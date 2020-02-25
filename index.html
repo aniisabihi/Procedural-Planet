@@ -3,7 +3,7 @@
 	<head>
 	    <meta charset=utf-8>
 	    <title>Procedural Planet</title>
-	    <script src="js/three.js"></script>
+	    <script src="lib/three.js"></script>
 	    <script src="js/OrbitControls.js"></script>
 
 		<style>
@@ -12,48 +12,87 @@
 		</style>
 	</head>
 	<body>
+		<div id="container"></div>
 		<script type="text/javascript">
 			var scene = new THREE.Scene();
-			var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
-
 			var renderer = new THREE.WebGLRenderer();
-			renderer.setSize( window.innerWidth, window.innerHeight );
+			var WIDTH = window.innerWidth;
+			var HEIGHT = window.innerHeight;
+			renderer.setSize(WIDTH, HEIGHT);
 			document.body.appendChild( renderer.domElement );
 
+			/*
+			const container =document.querySelector('#container');
+			container.appendChild(renderer.domElement);*/
+
+			var ratio = WIDTH/HEIGHT;
+			var camera = new THREE.PerspectiveCamera(45, ratio, 1, 1000);
+			camera.position.z = 5;
+			camera.position.y = 2;
+			camera.lookAt(new THREE.Vector3(0, 0, 0));
+			//var controls = new THREE.OrbitControls( camera ); //Give user control of camera
+			//scene.add(camera);
+
 			//Adding cube to scene
-			var geometry = new THREE.SphereGeometry();
-			var material = new THREE.MeshLambertMaterial( { color: 0xff0000 } );
+			var geometry = new THREE.SphereGeometry(1,32,32);
+			var material = new THREE.MeshPhongMaterial( { color: 0xff0000 } );
 			var cube = new THREE.Mesh( geometry, material );
-			cube.position.x = 0
-			cube.position.z = -2;
+			cube.overdraw = true;
 			scene.add( cube );
 
-			//Adding light to scene
-			var light = new THREE.PointLight(0xFFFFFF);
+			//Adding stars to scene
+			const stars = new THREE.BoxGeometry(20, 20, 10);
+			const starsMaterial = new THREE.MeshLambertMaterial( {color: 0xff86e4} ); //0xffffff
+
+			//Adding directional light to scene
+			var light = new THREE.DirectionalLight(0xFFFFFF, 1);
 			var lightAngle = 0;
-			light.position.x = 2;
-			light.position.y = 5;
-			light.position.z = 0;
+			light.position.set(0, 1, 0.5);
 			scene.add(light);
 
-			/* Give user control of camera
-			camera.position.z = 10;
-			var controls = new THREE.OrbitControls( camera );*/
+			var particleCount = 1000,
+			    particles = new THREE.Geometry(),
+			    ptexture = new THREE.TextureLoader().load("https://s22.postimg.cc/w7b1iilr5/particle_A.png"),
+			    pMaterial = new THREE.PointsMaterial({
+			      color: 0xFFFFFF,
+			      map: ptexture,
+			      transparent: true, 
+			      blending: THREE.AdditiveBlending,
+			      depthTest: true, 
+			      size: 3
+		    });
+
+			// now create the individual particles
+			for (var p = 0; p < particleCount; p++) {
+			  // create a particle with random x position (-120, 120)
+			  var pX = Math.random() * 240 - 120,
+			      pY = Math.random() * 240 - 120,
+			      pZ = Math.random() * 240 - 120,
+			      particle = new THREE.Vector3(pX, pY, pZ);
+
+			  particles.vertices.push(particle);
+			}
+
+			// create the particle system
+			var particleSystem = new THREE.Points(particles, pMaterial);
+			particleSystem.sortParticles = true;
+			scene.add(particleSystem);
 
 			//Rendering 
 			function animate() {
 				//Light moves in circular motion above cube
-				/*lightAngle += 5;
+				/*lightAngle += 2;
 	  			if (lightAngle > 360) { lightAngle = 0;};
-				  light.position.x = 5 * Math.cos(lightAngle * Math.PI / 180);
-				  light.position.z = 5 * Math.sin(lightAngle * Math.PI / 180);*/
-
+				  light.position.x = 2 * Math.cos(lightAngle * Math.PI / 180);
+				  light.position.z = 2 * Math.sin(lightAngle * Math.PI / 180);*/
+				 particleSystem.rotation.y += 0.001;
 				requestAnimationFrame( animate );
 				cube.rotation.x += 0.001;
 				cube.rotation.y += 0.001;
 				renderer.render( scene, camera );
 			}
 			animate();
+
 		</script>
 	</body>
 </html>
