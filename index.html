@@ -1,36 +1,59 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <meta charset=utf-8>
-    <title>Procedural Planet</title>
-    <script src="js/three.js"></script>
-	<style>
-		body { margin: 0; }
-		canvas { display: block; }
-	</style>
-</head>
-<body>
-	<script type="text/javascript">
-		var scene = new THREE.Scene();
-		var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+	<head>
+	    <meta charset=utf-8>
+	    <title>Procedural Planet</title>
+	    <script src="js/three.js"></script>
+	    <script src="js/OrbitControls.js"></script>
 
-		var renderer = new THREE.WebGLRenderer();
-		renderer.setSize( window.innerWidth, window.innerHeight );
-		document.body.appendChild( renderer.domElement );
+		<style>
+			body { margin: 0; }
+			canvas { display: block; }
+		</style>
+	</head>
+	<body>
+		<script type="text/javascript">
+			var scene = new THREE.Scene();
+			var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
 
-		var geometry = new THREE.BoxGeometry();
-		var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-		var cube = new THREE.Mesh( geometry, material );
-		scene.add( cube );
+			var renderer = new THREE.WebGLRenderer();
+			renderer.setSize( window.innerWidth, window.innerHeight );
+			document.body.appendChild( renderer.domElement );
 
-		camera.position.z = 5;
+			//Adding cube to scene
+			var geometry = new THREE.SphereGeometry();
+			var material = new THREE.MeshLambertMaterial( { color: 0xff0000 } );
+			var cube = new THREE.Mesh( geometry, material );
+			cube.position.x = 0
+			cube.position.z = -2;
+			scene.add( cube );
 
-		function animate() {
-			requestAnimationFrame( animate );
-			renderer.render( scene, camera );
-		}
-		animate();
-	</script>
+			//Adding light to scene
+			var light = new THREE.PointLight(0xFFFFFF);
+			var lightAngle = 0;
+			light.position.x = 2;
+			light.position.y = 5;
+			light.position.z = 0;
+			scene.add(light);
 
-</body>
+			/* Give user control of camera
+			camera.position.z = 10;
+			var controls = new THREE.OrbitControls( camera );*/
+
+			//Rendering 
+			function animate() {
+				//Light moves in circular motion above cube
+				/*lightAngle += 5;
+	  			if (lightAngle > 360) { lightAngle = 0;};
+				  light.position.x = 5 * Math.cos(lightAngle * Math.PI / 180);
+				  light.position.z = 5 * Math.sin(lightAngle * Math.PI / 180);*/
+
+				requestAnimationFrame( animate );
+				cube.rotation.x += 0.001;
+				cube.rotation.y += 0.001;
+				renderer.render( scene, camera );
+			}
+			animate();
+		</script>
+	</body>
 </html>
