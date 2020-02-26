@@ -12,7 +12,7 @@ var camera = new THREE.PerspectiveCamera(45, ratio, 1, 1000);
 camera.position.z = 5;
 camera.position.y = 2;
 camera.lookAt(new THREE.Vector3(0, 0, 0));
-//var controls = new THREE.OrbitControls( camera ); //Give user control of camera
+//var controls = new THREE.OrbitControls( camera, renderer.domElement ); //Give user control of camera
 
 //Adding cube to scene
 var geometry = new THREE.SphereGeometry(1,32,32);
