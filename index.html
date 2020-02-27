@@ -15,7 +15,6 @@
 		<script type="module" id="main">
 			import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.112.0/build/three.module.js";
     		import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.112.0/examples/jsm/controls/OrbitControls.js";
-    		//import {color, controllers, dom, gui, GUI} from "./dat.gui.module.js";
 
 			//Setting up scene
 			var scene = new THREE.Scene();
@@ -32,8 +31,14 @@
 			camera.lookAt(new THREE.Vector3(0, 0, 0));
 			var controls = new OrbitControls( camera, renderer.domElement ); //Give user control of camera
 
+			//Adding directional light to scene
+			var light = new THREE.DirectionalLight(0xFFFFFF, 1);
+			var lightAngle = 0;
+			light.position.set(0, 1, 0.5);
+			scene.add(light);
+
 			//Adding MAIN EDITABLE PLANET to scene
-			var geometryMain = new THREE.SphereGeometry(1,32,32);
+			var geometryMain = new THREE.SphereGeometry(2,32,32);
 			var materialMain = new THREE.MeshPhongMaterial( { color: 0x8F5706 } );
 			var mainPlanet = new THREE.Mesh( geometryMain, materialMain );
 			mainPlanet.overdraw = true;
@@ -47,7 +52,7 @@
 					texture = new THREE.TextureLoader().load( text );
 				//Wrap texture
 				texture.wrapS = texture.wrapT = THREE.MirroredRepeatWrapping;
-				texture.repeat.set( 2, 2 );
+				texture.repeat.set( 1, 1 );
 				//Mesh texture
 				var material = new THREE.MeshBasicMaterial( { map: texture } ),
 					planet = new THREE.Mesh( geometry, material );
@@ -55,24 +60,18 @@
 				planet.position.x = posX;
 				planet.position.y = posY;
 				planet.position.z = posZ;
-				scene.add(planet);			
+				scene.add(planet);	
 			}
 			
 			//Adding extra six planets with image textures to scene
-			var fire = generatePlanet(1, "img/fire.png", -5, 0, 0);
-			var marsy = generatePlanet(1, "img/marsy.png", 0, 0, -5);
-			var neptune = generatePlanet(1, "img/neptune.png", 5, 0, 0);
-			var rainbow = generatePlanet(1, "img/rainbow.png", 0, 0, 5);
-			var strange = generatePlanet(0.5, "img/strange.png", -9, 0, 0);
-			var venus = generatePlanet(1, "img/venus.png", 0, 0, 9);
-			var sun = generatePlanet(1, "img/sun.jpg", 2, 0, 0);
-			var help = generatePlanet(1, "img/refPlanets.jpg", -2, 0, 0);
-
-			//Adding directional light to scene
-			var light = new THREE.DirectionalLight(0xFFFFFF, 1);
-			var lightAngle = 0;
-			light.position.set(0, 1, 0.5);
-			scene.add(light);
+			var fire = generatePlanet(0.8, "img/fire.png", -5, 0, 0);
+			var marsy = generatePlanet(0.5, "img/marsy.png", 0, 0, -5);
+			var neptune = generatePlanet(0.7, "img/neptune.png", 5, 0, 0);
+			var rainbow = generatePlanet(0.5, "img/rainbow.png", 0, 0, 5);
+			var strange = generatePlanet(1, "img/strange.png", -9, 0, 0);
+			var venus = generatePlanet(0.6, "img/venus.png", 0, 0, 9);
+			var sun = generatePlanet(1, "img/sun.jpg", 8, 0, 0);
+			var help = generatePlanet(0.5, "img/sky.jpg", -3, 0, 0);
 
 			//Create particles
 			var particleCount = 1000,
@@ -112,9 +111,10 @@
 				  light.position.z = 0.5 * Math.sin(lightAngle * Math.PI / 180);
 
 				requestAnimationFrame( animate );
+				//Rotations
 				mainPlanet.rotation.x += 0.001;
 				mainPlanet.rotation.y += 0.001;
-				particleSystem.rotation.y += 0.001;
+				particleSystem.rotation.y -= 0.001;
 				renderer.render( scene, camera );
 			}
 			animate();
