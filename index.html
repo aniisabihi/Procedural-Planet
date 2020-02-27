@@ -3,7 +3,6 @@
 	<head>
 	    <meta charset=utf-8>
 	    <title>Procedural Planet</title>
-
 		<style>
 			body { margin: 0; }
 			canvas { display: block; }
@@ -17,32 +16,56 @@
     		import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.112.0/examples/jsm/controls/OrbitControls.js";
 
 			//Setting up scene
-			var scene = new THREE.Scene();
-			var renderer = new THREE.WebGLRenderer();
-			var WIDTH = window.innerWidth;
-			var HEIGHT = window.innerHeight;
+			var scene = new THREE.Scene(),
+				renderer = new THREE.WebGLRenderer(),
+				WIDTH = window.innerWidth,
+				HEIGHT = window.innerHeight;
 			renderer.setSize(WIDTH, HEIGHT);
 			document.body.appendChild( renderer.domElement );
 
 			//Adding camera to scene
-			var ratio = WIDTH/HEIGHT;
-			var camera = new THREE.PerspectiveCamera(45, ratio, 1, 1000);
+			var ratio = WIDTH/HEIGHT,
+				camera = new THREE.PerspectiveCamera(45, ratio, 1, 1000),
+				controls = new OrbitControls( camera, renderer.domElement ); //Give user control of camera
 			camera.position.y = 20;
-			camera.lookAt(new THREE.Vector3(0, 0, 0));
-			var controls = new OrbitControls( camera, renderer.domElement ); //Give user control of camera
+			//camera.lookAt(new THREE.Vector3(0, 0, 0));
 
 			//Adding directional light to scene
-			var light = new THREE.DirectionalLight(0xFFFFFF, 1);
-			var lightAngle = 0;
+			var light = new THREE.DirectionalLight(0xFFFFFF, 1),
+				lightAngle = 0;
 			light.position.set(0, 1, 0.5);
 			scene.add(light);
 
 			//Adding MAIN EDITABLE PLANET to scene
-			var geometryMain = new THREE.SphereGeometry(2,32,32);
-			var materialMain = new THREE.MeshPhongMaterial( { color: 0x8F5706 } );
-			var mainPlanet = new THREE.Mesh( geometryMain, materialMain );
+			var geometryMain = new THREE.SphereGeometry(2,32,32),
+				materialMain = new THREE.MeshPhongMaterial( { color: 0x8F5706 } ),
+				mainPlanet = new THREE.Mesh( geometryMain, materialMain );
 			mainPlanet.overdraw = true;
 			scene.add( mainPlanet );
+
+			//TEST TEST TEST TEST TEST TEST TEST TEST TEST Earth + Clouds
+			var TESTgeometry = new THREE.SphereGeometry(1, 32, 32),
+				CLOUDgeometry   = new THREE.SphereGeometry(1.01, 32, 32),
+				TESTmaterial = new THREE.MeshPhongMaterial({
+					map 		: new THREE.TextureLoader().load('img/earth.jpg'),
+					bumpMap 	: new THREE.TextureLoader().load('img/earthbump.jpg'),
+					bumpScale 	: 0.05,
+					specularMap : new THREE.TextureLoader().load('img/earthspec.jpg'),
+					specular 	: new THREE.Color('grey'),
+				}),
+				CLOUDmaterial  = new THREE.MeshPhongMaterial({
+					map     	: new THREE.TextureLoader().load('img/earth_clouds.png'),
+					side        : THREE.DoubleSide,
+					opacity     : 0.8,
+					transparent : true,
+					depthWrite  : false
+				}),
+				earthMesh = new THREE.Mesh(TESTgeometry, TESTmaterial),
+				cloudMesh = new THREE.Mesh(CLOUDgeometry, CLOUDmaterial);
+			earthMesh.position.x = -5;
+			scene.add(earthMesh);
+			earthMesh.add(cloudMesh);
+			//TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST
 
 			//Function that generates planets with images as textures
 			function generatePlanet(size, text, posX, posY, posZ){
@@ -61,10 +84,11 @@
 				planet.position.y = posY;
 				planet.position.z = posZ;
 				scene.add(planet);	
+
+				return planet; 
 			}
 			
-			//Adding extra six planets with image textures to scene
-			var earth = generatePlanet(0.8, "img/earth.jpg", -5, 0, 0);
+			//Adding extra eight planets with image textures to scene
 			var moon = generatePlanet(0.4, "img/moon.jpg", -6, 1, -1);
 			var jupiter = generatePlanet(0.5, "img/jupiter.jpg", 0, 0, -5);
 			var mars = generatePlanet(0.5, "img/mars.jpg", 0, 0, 5);
@@ -74,7 +98,7 @@
 			var uranus = generatePlanet(0.5, "img/uranus.jpg", -3, 0, 0);
 			var venus = generatePlanet(0.6, "img/venus.jpg", 0, 0, 7);
 
-
+			// CREATING THE STARRY BACKGROUND
 			//Create particles
 			var particleCount = 1000,
 			    particles = new THREE.Geometry(),
@@ -87,7 +111,6 @@
 			      depthTest: true, 
 			      size: 3
 			});
-
 			//Create the individual particles
 			for (var p = 0; p < particleCount; p++) {
 			  //Create a particle with random x position (-120, 120)
@@ -98,13 +121,12 @@
 
 			  particles.vertices.push(particle);
 			}
-
 			//Create the particle system
 			var particleSystem = new THREE.Points(particles, pMaterial);
 			particleSystem.sortParticles = true;
 			scene.add(particleSystem);
 
-			//Rendering 
+			//RENDERING 
 			function animate() {
 				//Light moves in circular motion above cube
 				lightAngle += 0.5;
@@ -112,14 +134,31 @@
 				  light.position.x = 0.5 * Math.cos(lightAngle * Math.PI / 180);
 				  light.position.z = 0.5 * Math.sin(lightAngle * Math.PI / 180);
 
-				requestAnimationFrame( animate );
 				//Rotations
 				mainPlanet.rotation.x += 0.001;
 				mainPlanet.rotation.y += 0.001;
+				earthMesh.rotation.y  -= 0.001;
+				cloudMesh.rotation.y  -= 0.001;
+				moon.rotation.x  -= 0.001;
+				moon.rotation.y  -= 0.001;
+				jupiter.rotation.y  -= 0.001;
+				mars.rotation.x  -= 0.001;
+				mars.rotation.y  -= 0.001;
+				mercury.rotation.x  -= 0.001;
+				mercury.rotation.y  -= 0.001;
+				neptune.rotation.y  -= 0.001;
+				saturn.rotation.y  -= 0.001;
+				uranus.rotation.x  -= 0.001;
+				uranus.rotation.y  -= 0.001;
+				venus.rotation.x  -= 0.001;
+				venus.rotation.y  -= 0.001;
 				particleSystem.rotation.y -= 0.001;
+
+				requestAnimationFrame( animate );
 				renderer.render( scene, camera );
 			}
 			animate();
+
 		</script>
 	</body>
 </html>
