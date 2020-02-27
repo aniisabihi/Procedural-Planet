@@ -25,10 +25,12 @@
 
 			//Adding camera to scene
 			var ratio = WIDTH/HEIGHT,
-				camera = new THREE.PerspectiveCamera(45, ratio, 1, 1000),
-				controls = new OrbitControls( camera, renderer.domElement ); //Give user control of camera
-			camera.position.y = 20;
+				camera = new THREE.PerspectiveCamera(45, ratio, 1, 1000);
+			//camera.position.x = 20;
+			//camera.position.y = 20;
+			camera.position.z = 90;
 			//camera.lookAt(new THREE.Vector3(0, 0, 0));
+			var controls = new OrbitControls( camera, renderer.domElement ); //Give user control of camera
 
 			//Adding directional light to scene
 			var light = new THREE.DirectionalLight(0xFFFFFF, 1),
@@ -37,40 +39,20 @@
 			scene.add(light);
 
 			//Adding MAIN EDITABLE PLANET to scene
-			var geometryMain = new THREE.SphereGeometry(2,32,32),
-				materialMain = new THREE.MeshPhongMaterial( { color: 0x8F5706 } ),
-				mainPlanet = new THREE.Mesh( geometryMain, materialMain );
+			var geometryMain = new THREE.BoxGeometry( 300, 300, 300, 32, 32, 32 ),
+				materialMain = new THREE.MeshPhongMaterial( { color: 0x8F5706 } );
+			for ( var i = 0, l = geometryMain.vertices.length; i < l; i ++ ) {
+			    var vertex = geometryMain.vertices[ i ];
+			    vertex.normalize().multiplyScalar( 4 );
+			}	
+			var	mainPlanet = new THREE.Mesh( geometryMain, materialMain );
 			mainPlanet.overdraw = true;
 			scene.add( mainPlanet );
 
-			//TEST TEST TEST TEST TEST TEST TEST TEST TEST Earth + Clouds
-			var TESTgeometry = new THREE.SphereGeometry(1, 32, 32),
-				CLOUDgeometry   = new THREE.SphereGeometry(1.01, 32, 32),
-				TESTmaterial = new THREE.MeshPhongMaterial({
-					map 		: new THREE.TextureLoader().load('img/earth.jpg'),
-					bumpMap 	: new THREE.TextureLoader().load('img/earthbump.jpg'),
-					bumpScale 	: 0.05,
-					specularMap : new THREE.TextureLoader().load('img/earthspec.jpg'),
-					specular 	: new THREE.Color('grey'),
-				}),
-				CLOUDmaterial  = new THREE.MeshPhongMaterial({
-					map     	: new THREE.TextureLoader().load('img/earth_clouds.png'),
-					side        : THREE.DoubleSide,
-					opacity     : 0.8,
-					transparent : true,
-					depthWrite  : false
-				}),
-				earthMesh = new THREE.Mesh(TESTgeometry, TESTmaterial),
-				cloudMesh = new THREE.Mesh(CLOUDgeometry, CLOUDmaterial);
-			earthMesh.position.x = -5;
-			scene.add(earthMesh);
-			earthMesh.add(cloudMesh);
-			//TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST
-
 			//Function that generates planets with images as textures
-			function generatePlanet(size, text, posX, posY, posZ){
+			function generatePlanet(radius, text, posX, posY, posZ){
 				//Geometry
-				var geometry = new THREE.SphereGeometry(size,32,32),
+				var geometry = new THREE.SphereGeometry(radius,32,32),
 					//Load texture
 					texture = new THREE.TextureLoader().load( text );
 				//Wrap texture
@@ -87,20 +69,64 @@
 
 				return planet; 
 			}
+
+			function generatePlanetRing(r, wSeg, hSeg, phiStart, phiLength,thetaStart, thetaLength, text, posX, posY, posZ){
+				//Geometry
+				var ringgeometry = new THREE.SphereGeometry(r, wSeg, hSeg, phiStart, phiLength, thetaStart, thetaLength),
+					//Load texture
+					ringtexture = new THREE.TextureLoader().load( text );
+				//Wrap texture
+				ringtexture.wrapS = ringtexture.wrapT = THREE.MirroredRepeatWrapping;
+				ringtexture.repeat.set( 1, 1 );
+				//Mesh texture
+				var ringmaterial = new THREE.MeshBasicMaterial( { map: ringtexture } ),
+					ring = new THREE.Mesh( ringgeometry, ringmaterial );
+				//Positions
+				ring.position.x = posX;
+				ring.position.y = posY;
+				ring.position.z = posZ;
+				scene.add(ring);
+
+				return ring; 
+			}
 			
-			//Adding extra eight planets with image textures to scene
-			var moon = generatePlanet(0.4, "img/moon.jpg", -6, 1, -1);
-			var jupiter = generatePlanet(0.5, "img/jupiter.jpg", 0, 0, -5);
-			var mars = generatePlanet(0.5, "img/mars.jpg", 0, 0, 5);
-			var mercury = generatePlanet(1, "img/mercury.jpg", -9, 0, 0);
-			var neptune = generatePlanet(0.7, "img/neptune.jpg", 5, 0, 0);
-			var saturn = generatePlanet(1, "img/saturn.jpg", 8, 0, 0);
-			var uranus = generatePlanet(0.5, "img/uranus.jpg", -3, 0, 0);
-			var venus = generatePlanet(0.6, "img/venus.jpg", 0, 0, 7);
+			//Adding extra nine planets with image textures to scene
+			//Earth + Clouds
+			var geometryEarth = new THREE.SphereGeometry(1.4, 32, 32),
+				geometryClouds = new THREE.SphereGeometry(1.41, 32, 32),
+				materialEarth = new THREE.MeshPhongMaterial({
+					map 		: new THREE.TextureLoader().load('img/earth.jpg'),
+					bumpMap 	: new THREE.TextureLoader().load('img/earthbump.jpg'),
+					bumpScale 	: 0.05,
+					specularMap : new THREE.TextureLoader().load('img/earthspec.jpg'),
+					specular 	: new THREE.Color('grey'),
+				}),
+				materialClouds  = new THREE.MeshPhongMaterial({
+					map     	: new THREE.TextureLoader().load('img/earth_clouds.png'),
+					side        : THREE.DoubleSide,
+					opacity     : 0.8,
+					transparent : true,
+					depthWrite  : false
+				}),
+				earth = new THREE.Mesh(geometryEarth, materialEarth),
+				clouds = new THREE.Mesh(geometryClouds, materialClouds);
+				earth.position.x = 13.4;
+				scene.add(earth);
+				earth.add(clouds);
+			var mercury = generatePlanet(0.8, "img/mercury.jpg" , 6.8, 0, 0),
+				venus = generatePlanet(1.2, "img/venus.jpg", 9.8, 0, 0),
+				moon = generatePlanet(0.6, "img/moon.jpg", 13.4, 2, -2),
+				mars = generatePlanet(0.8, "img/mars.jpg", 16.6, 0, 0),
+				jupiter = generatePlanet(2, "img/jupiter.jpg", 20.4, 0, 0),
+				saturn = generatePlanet(1.9, "img/saturn.jpg", 26.3, 0, 0),
+					saturnRing = generatePlanetRing(2.9, 32, 2, 3, 6.3, 1, 0.2, "img/saturn_ring.png", 26.3, -1.45, 0),
+				uranus = generatePlanet(1.8, "img/uranus.jpg", 32, 0, 0),
+					uranusRing = generatePlanetRing(2.8, 32, 2, 3, 6.3, 1, 0.2, "img/uranus_ring.jpg", 32, -1.4, 0),
+				neptune = generatePlanet(1.8, "img/neptune.jpg", 36.6, 0, 0);
 
 			// CREATING THE STARRY BACKGROUND
 			//Create particles
-			var particleCount = 2000,
+			var particleCount = 3000,
 			    particles = new THREE.Geometry(),
 			    ptexture = new THREE.TextureLoader().load("img/star.png"),
 			    pMaterial = new THREE.PointsMaterial({
@@ -135,10 +161,10 @@
 				  light.position.z = 0.5 * Math.sin(lightAngle * Math.PI / 180);
 
 				//Rotations
-				mainPlanet.rotation.x += 0.001;
-				mainPlanet.rotation.y += 0.001;
-				earthMesh.rotation.y  -= 0.001;
-				cloudMesh.rotation.y  -= 0.001;
+				mainPlanet.rotation.x -= 0.001;
+				mainPlanet.rotation.y -= 0.001;
+				earth.rotation.y  -= 0.001;
+				clouds.rotation.y  -= 0.001;
 				moon.rotation.x  -= 0.001;
 				moon.rotation.y  -= 0.001;
 				jupiter.rotation.y  -= 0.001;
