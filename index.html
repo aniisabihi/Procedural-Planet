@@ -37,22 +37,20 @@
 				lightAngle = 0;
 			light.position.set(0, 1, 0.5);
 			scene.add(light);
+			/*var light = new THREE.AmbientLight( 0x404040 ); // soft white light
+			scene.add( light );*/
 
 			//Adding MAIN EDITABLE PLANET to scene
-			var geometryMain = new THREE.BoxGeometry( 300, 300, 300, 32, 32, 32 ),
-				materialMain = new THREE.MeshPhongMaterial( { color: 0x8F5706 } );
-			for ( var i = 0, l = geometryMain.vertices.length; i < l; i ++ ) {
-			    var vertex = geometryMain.vertices[ i ];
-			    vertex.normalize().multiplyScalar( 4 );
-			}	
-			var	mainPlanet = new THREE.Mesh( geometryMain, materialMain );
+			var geometryMain = new THREE.IcosahedronGeometry( 4, 4 ),
+				materialMain = new THREE.MeshPhongMaterial( { color: 0xFFFFFF } ),
+				mainPlanet = new THREE.Mesh( geometryMain, materialMain );
 			mainPlanet.overdraw = true;
 			scene.add( mainPlanet );
 
 			//Function that generates planets with images as textures
 			function generatePlanet(radius, text, posX, posY, posZ){
 				//Geometry
-				var geometry = new THREE.SphereGeometry(radius,32,32),
+				var geometry = new THREE.IcosahedronGeometry( radius, 4 ),
 					//Load texture
 					texture = new THREE.TextureLoader().load( text );
 				//Wrap texture
@@ -70,6 +68,7 @@
 				return planet; 
 			}
 
+			//Function that generates planets rings with images as textures
 			function generatePlanetRing(r, wSeg, hSeg, phiStart, phiLength,thetaStart, thetaLength, text, posX, posY, posZ){
 				//Geometry
 				var ringgeometry = new THREE.SphereGeometry(r, wSeg, hSeg, phiStart, phiLength, thetaStart, thetaLength),
@@ -155,10 +154,10 @@
 			//RENDERING 
 			function animate() {
 				//Light moves in circular motion above cube
-				lightAngle += 0.5;
+				/*lightAngle += 0.5;
 					if (lightAngle > 360) { lightAngle = 0;};
 				  light.position.x = 0.5 * Math.cos(lightAngle * Math.PI / 180);
-				  light.position.z = 0.5 * Math.sin(lightAngle * Math.PI / 180);
+				  light.position.z = 0.5 * Math.sin(lightAngle * Math.PI / 180);*/
 
 				//Rotations
 				mainPlanet.rotation.x -= 0.001;
