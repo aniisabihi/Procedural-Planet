@@ -56,7 +56,7 @@
 			scene.add(light2);
 
 			//Adding MAIN EDITABLE PLANET to scene
-				/* Box Geometry Planet*/
+				/* Box Geometry Planet
 				var geometryMain = new THREE.BoxGeometry( 300, 300, 300, 32, 32, 32 ),
 					materialMain = new THREE.MeshPhongMaterial( { color: 0xFFFFFF, wireframe: true } );
 				for ( var i = 0, l = geometryMain.vertices.length; i < l; i ++ ) {
@@ -70,16 +70,16 @@
 				  faceMaterial.map = createMap(i); // see github for implementation
 				  materialArray.push(faceMaterial);
 				}
-				var sphereMaterial = new THREE.MeshFaceMaterial(materialArray);
+				var sphereMaterial = new THREE.MeshFaceMaterial(materialArray);*/
 
-			/*Sphere geometry planet
+			/*Sphere geometry planet*/
 			var geometryMain = new THREE.SphereGeometry( 4, 32, 32),
 				materialMain = new THREE.MeshPhongMaterial( { color: 0xFFFFFF, wireframe: true } ),
 				mainPlanet = new THREE.Mesh( geometryMain, materialMain );
 			mainPlanet.overdraw = true;
 			mainPlanet.castShadow = true;
 			mainPlanet.receiveShadow = false; //default
-			scene.add( mainPlanet );*/
+			scene.add( mainPlanet );
 
 			//Function that generates planets with images as textures
 			function generatePlanet(radius, text, posX, posY, posZ){
