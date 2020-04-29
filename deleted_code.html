@@ -1,10 +1,76 @@
-//camera.position.x = 20;
-//camera.position.y = 90;
+<!-- ---------------------------------------------------------------------------------------------- -->
+
+
+/* 
+    var colorUniforms = THREE.UniformsUtils.merge([{ 
+      color1: { value: color  }, //yellow #cc9900 (204, 153, 0)
+      color2: { value: new THREE.Color( color2 ).toArray() }, //orange #e65c00 (230, 92, 0)
+      color3: { value: new THREE.Color( color3 ).toArray() }, //red #ff0000 (255, 0, 0)
+      color4: { value: new THREE.Color( color4 ).toArray() }, //black #1a1a1a (26, 26, 26)
+    }]);
+
+    console.log(colorUniforms.color1);
+
+    // Sun value uniforms
+    var mainUniforms = THREE.UniformsUtils.merge([{ 
+      displacementSize: { value: -0.3 },
+      time: { value: 0 }
+    }]);
+
+    // Merge all the uniform together
+    var allUniforms = THREE.UniformsUtils.merge([ 
+      colorUniforms,
+      mainUniforms
+    ]);
+*/
+
+
 
 <!-- ---------------------------------------------------------------------------------------------- -->
 
+//PLANET RINGS
+//Wrap texture
+//ringtexture.wrapS = ringtexture.wrapT = THREE.MirroredRepeatWrapping;
+//ringtexture.repeat.set( 1, 1 );
+//Mesh texture
+//var ringmaterial = new THREE.MeshBasicMaterial( { map: ringtexture, side: THREE.DoubleSide } ),
+
+
+<!-- ---------------------------------------------------------------------------------------------- -->
+
+
+// Background sphere 
+/*
+	var loader = new THREE.CubeTextureLoader();
+	loader.setPath( 'img/background' );
+
+	var textureCube = loader.load( [
+		'pano.jpg', 'pano.jpg',
+		'pano.jpg', 'pano.jpg',
+		'pano.jpg', 'pano.jpg'
+	] );
+
+	var materialBG = new THREE.MeshBasicMaterial( { color: 0xffffff, envMap: textureCube } );
+	var panoTexture = new THREE.TextureLoader().load( 'img/background/space.jpg' ),
+		panoGeometry = new THREE., //THREE.SphereGeometry( 500, 60, 60 ),
+		background = new THREE.Mesh( panoGeometry, materialBG );
+	background.scale.x = -1;
+	background.doubleSided = true; 
+//scene.add( background );*/
+
+<!-- ---------------------------------------------------------------------------------------------- -->
+
+
+//camera.position.x = 20;
+//camera.position.y = 90;
+
+
+<!-- ---------------------------------------------------------------------------------------------- -->
+
+
 //weight: { type: "f", value: 0 }
 //materialMain.uniforms[ 'weight' ].value = 10.0 * ( .5 + .5 * Math.sin( .00025 * ( Date.now() - start ) ) );
+
 
 <!-- ---------------------------------------------------------------------------------------------- -->
 
@@ -34,8 +100,8 @@ lightAngle += 0.5;
   light.position.z = 0.5 * Math.sin(lightAngle * Math.PI / 180);*/
 
 
-<!-- ---------------------------------------------------------------------------------------------- -->
 
+<!-- ---------------------------------------------------------------------------------------------- -->
 
 /* Box Geometry Planet
 var geometryMain = new THREE.BoxGeometry( 300, 300, 300, 32, 32, 32 ),
@@ -54,8 +120,8 @@ for (var i = 0; i < 6; i++) {
 var sphereMaterial = new THREE.MeshFaceMaterial(materialArray);*/
 
 
-<!-- ---------------------------------------------------------------------------------------------- -->
 
+<!-- ---------------------------------------------------------------------------------------------- -->
 
 <!-- VERTEX SHADER - PLANE WAVE TEST 
 <script type="x-shader/x-vertex" id="VS">
@@ -195,4 +261,20 @@ var sphereMaterial = new THREE.MeshFaceMaterial(materialArray);*/
 	}
 </script>-->
 
+
+
 <!-- ---------------------------------------------------------------------------------------------- -->
+		    //import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.112.0/build/three.module.js";
+		    //import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.112.0/examples/jsm/controls/OrbitControls.js";
+		    //import {color, controllers, dom, gui, GUI} from "./dat.gui.module.js";
+
+
+<!-- ---------------------------------------------------------------------------------------------- -->
+
+	      	//vec3( vUv * ( 1. - 2. * noise ), 0.0 );
+	      	//gl_FragColor = vec4(mix(colormix2, colormix1, vUv.y), 1.0); //gradient
+
+
+<!-- ---------------------------------------------------------------------------------------------- -->
+
+

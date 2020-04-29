@@ -1,12 +1,35 @@
 <!DOCTYPE html>
 <html>
 	<head>
-	    <meta charset=utf-8>
-	    <title>Procedural Solar System</title>
+		<title>Procedural Solar System</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<style>
+			body {
+				font-family: tahoma;
+				font-size:13px;
+				background-color: black;
+				margin: 0px;
+				overflow: hidden;
+				box-sizing: border-box; 
+				margin: 0; 
+				padding: 0;
+			}
+		</style>
 	</head>
 	<body>
+		<div id="container">
+			<h1>A Solar System With A Procedural Sun</h1>
+  			<h3>Created by Aniisa Bihi</h3>
+		</div>
 
-		<!-- VERTEX SHADER - FOR EDITABLE SUN -->
+		<!------------- ADDING NECCESARY SCRIPTS ------------->
+		<script src="js/three.min.js"></script>
+		<script src="js/OrbitControls.js"></script>
+		<script src="js/dat.gui.min.js"></script>
+
+
+		<!--------- VERTEX SHADER - FOR EDITABLE SUN --------->
 		<script type="x-shader/x-vertex" id="vertexShader">
 			//
 			// GLSL textureless classic 3D noise "cnoise",
@@ -185,14 +208,19 @@
 			  float n_xyz = mix(n_yz.x, n_yz.y, fade_xyz.x); 
 			  return 2.2 * n_xyz;
 			}
+			//
+			//
 
-		    varying vec2 vUv;
 			varying float noise;
+			varying float noise2; 
 			uniform float time;
 
+			// Gui parameters
+			uniform float displacementSize;
+			uniform float noise_size;
+
 			float turbulence( vec3 p ) {
-			  float w = 100.0;
-			  float t = -.5;
+			  float t = -.35;
 			  for (float f = 1.0 ; f <= 10.0 ; f++ ){
 			    float power = pow( 2.0, f );
 			    t += abs( pnoise( vec3( power * p ), vec3( 10.0, 10.0, 10.0 ) ) / power );
@@ -202,305 +230,522 @@
 
 			void main() {
 
-			  vUv = uv;
-
-			  noise = 10.0 *  -.10 * turbulence( .5 * normal + time );
+			  noise = 18.0 *  noise_size * turbulence( normal + time );
+			  noise2 = 10.0 *  noise_size * turbulence( normal + time );
 			  float b = 5.0 * pnoise( 0.05 * position + vec3( 2.0 * time ), vec3( 100.0 ) );
-			  float displacement = - 10. * noise + b;
+			  float displacement = - 5. * noise + b;
 
-			  vec3 newPosition = position + normal * displacement;
+			  vec3 newPosition = position + normal * ( displacement * displacementSize);
+
 			  gl_Position = projectionMatrix * modelViewMatrix * vec4( newPosition, 1.0 );
-
 			}
-
 		</script>
 
-		<!-- FRAGMENT SHADER - FOR EDITABLE SUN -->
+		<!-------- FRAGMENT SHADER - FOR EDITABLE SUN -------->
 		<script type="x-shader/x-vertex" id="fragmentShader">
-	      varying vec2 vUv;
+
 	      varying float noise;
-	      uniform vec3 color1;
-	      uniform vec3 color2;
-	      uniform vec3 color3; 
-	      uniform vec3 color4; 
+	      varying float noise2;
+
+	      // Gui parameters
+	      uniform vec3 highlight;
+	      uniform vec3 highlightBlend;
+	      uniform vec3 blend; 
+	      uniform vec3 innerGlow; 
 
 	      void main() {
-	      	vec3 colormix1 = mix(color1, color2, (1. - 2. * noise));
-	      	vec3 colormix2 = mix(color3, color4, (1. - 2. * noise));
-	      	vec3 colorNoise = mix(colormix1, colormix2, (1. -2. * noise)); 
-	      	//vec3( vUv * ( 1. - 2. * noise ), 0.0 );
-	      	//gl_FragColor = vec4(mix(colormix2, colormix1, vUv.y), 1.0); //gradient
-	      	gl_FragColor = vec4( colorNoise, 1.0);
 
+	      	vec3 colormix1 = mix(highlight, highlightBlend, (1. - 2. * noise2));
+	      	vec3 colormix2 = mix(blend, innerGlow, (1. - 2. * noise));
+	      	vec3 colorNoise = mix(colormix1, colormix2, (1. -2. * noise)); 
+	      	gl_FragColor = vec4( colorNoise, 1.0);
 	      }
 		</script>
 
+		<!------------------ MAIN SCRIPT --------------------->
+		<script id="main">
 
-		<!-- MAIN SCRIPT -->
-		<script type="module" id="main">
-			import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.112.0/build/three.module.js";
-    		import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.112.0/examples/jsm/controls/OrbitControls.js";
-
-			//Setting up scene
-			var scene = new THREE.Scene(),
-				renderer = new THREE.WebGLRenderer(),
-				WIDTH = window.innerWidth,
-				HEIGHT = window.innerHeight,
+			var container, renderer, scene,
+				camera, mesh, fov = 45, 
+				cameraPosX = 100,
+				cameraPosY = 50,
+				cameraPosZ = 100,
+				width = window.innerWidth, 
+				height = window.innerHeight, 
+				ratio =  width/height,
 				start = Date.now();
-			renderer.setSize(WIDTH, HEIGHT);
-			renderer.setPixelRatio( window.devicePixelRatio );
-			document.body.appendChild( renderer.domElement );
 
-			//Adding camera to scene
-			var ratio = WIDTH/HEIGHT,
-				camera = new THREE.PerspectiveCamera(45, ratio, 1, 1000);
-			camera.position.z = 60;
-			var controls = new OrbitControls( camera, renderer.domElement ); //Give user control of camera
+			window.addEventListener( 'load', init );
 
+			function init() {
 
-			//Adding MAIN EDITABLE PLANET to scene
-			/*Sphere geometry planet*/
-			var geometryMain = new THREE.IcosahedronGeometry( 20, 6 ); //new THREE.SphereGeometry( 8, 32, 32);
-			var materialMain = new THREE.ShaderMaterial({
-								uniforms: {
-									color1: {
-								      value: new THREE.Color("#cccc00")
-								    },
-								    color2: {
-								      value: new THREE.Color("#e65c00")
-								    },
-								    color3: {
-								      value: new THREE.Color("red")
-								    },
-								    color4: {
-								      value: new THREE.Color("#1a1a1a")
-								    },
-									time: { type: "f", value: 0 }
-								},
-								vertexShader: document.getElementById('vertexShader').textContent,
-								fragmentShader: document.getElementById('fragmentShader').textContent,
-								side: THREE.DoubleSide
-							  });
-			var mainPlanet = new THREE.Mesh( geometryMain, materialMain );
-			mainPlanet.overdraw = true;
-			mainPlanet.castShadow = true;
-			mainPlanet.receiveShadow = false; //default
-			scene.add( mainPlanet );
+				// <!--------------------------------- SETTING UP SCENE ---------------------------------------------->
+				container = document.getElementById( 'container' );
+
+				scene = new THREE.Scene();
+				renderer = new THREE.WebGLRenderer( {antialias:true});
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setSize( width, height);
+				renderer.autoClear = false;
+				container.appendChild( renderer.domElement );
+
+				// Setting up camera
+				camera = new THREE.PerspectiveCamera( fov, ratio, 1, 10000 );
+				camera.position.x = cameraPosX;
+				camera.position.y = cameraPosY;
+				camera.position.z = cameraPosZ;
+				camera.target = new THREE.Vector3( 0, 0, 0 );
+				scene.add( camera );
+				// Give user control of camera
+				var controls = new THREE.OrbitControls( camera, renderer.domElement );
+
+				// <!------------------------------------------------------------------------------------------------->
 
 
-			//Function that generates planets with images as textures
-			function generatePlanet(radius, text, posX, posY, posZ){
-				//Geometry
-				var geometry = new THREE.SphereGeometry( radius, 32, 32 ),
-					//Load texture
-					texture = new THREE.TextureLoader().load( text );
-				//Wrap texture
-				texture.wrapS = texture.wrapT = THREE.MirroredRepeatWrapping;
-				texture.repeat.set( 1, 1 );
-				//Mesh texture
-				var material = new THREE.MeshBasicMaterial( { map: texture } ),
-					planet = new THREE.Mesh( geometry, material );
-				//Shadows 
-				planet.castShadow = true;
-  				planet.receiveShadow = true;
-				//Positions
-				planet.position.x = posX;
-				planet.position.y = posY;
-				planet.position.z = posZ;
-				scene.add(planet);	
+				// <!--------------------------------- MAIN GUI EDITABLE PLANET -------------------------------------->
 
-				return planet; 
-			}
+				// Sunlight 
+				var lightColor = 0xffffff,
+					lightIntensity = 1.0;
+					lightDistance = 0.0; 
+					lightDecay = 2.0; 
+					sunlight = new THREE.PointLight( lightColor, lightIntensity, lightDistance, lightDecay);
+				sunlight.power = lightIntensity * 4 * Math.PI; 
+				sunlight.castShadow = true;
+				sunlight.position.set( 0, 0, 0 );
+				scene.add( sunlight );
 
-			//Function that generates planets rings with images as textures
-			function generatePlanetRing(inR, outR, thetaSeg, phiSeg,thetaStart, thetaLength, text, posX, posY, posZ){
-				//Geometry
-				var ringgeometry = new THREE.RingGeometry(inR, outR, thetaSeg, phiSeg, thetaStart, thetaLength),
-					//Load texture
-					texture = new THREE.TextureLoader().load( text );
-				//Wrap texture
-				//ringtexture.wrapS = ringtexture.wrapT = THREE.MirroredRepeatWrapping;
-				//ringtexture.repeat.set( 1, 1 );
-				//Mesh texture
-				//var ringmaterial = new THREE.MeshBasicMaterial( { map: ringtexture, side: THREE.DoubleSide } ),
+				// The colors of the sun
+				var highlight = 0xcc9900, 
+					highlightBlend = 0xe65c00,
+					blend = 0xff0000,
+					innerGlow = 0x000000;
 
-				const uniforms = THREE.UniformsUtils.merge([
-				    THREE.UniformsLib.ambient,
-				    THREE.UniformsLib.lights,
-				    THREE.UniformsLib.shadowmap,
-				    {
-				      ringTexture: { value: null },
-				      innerRadius: { value: 0 },
-				      outerRadius: { value: 0 },
-				      lightPosition: { value: null }
-				    }
-				  ]);
-				  uniforms.ringTexture.value = texture;
-				  uniforms.innerRadius.value = inR;
-				  uniforms.outerRadius.value = outR;
-				  uniforms.lightPosition.value = new THREE.Vector3(-5, 5, 1);
+				// The parameters of the noise
+				var noiseSpeed = .000020,
+					noiseSize = -0.10,
+					noiseDisplacement = -0.30;
 
-				  const ringmaterial = new THREE.ShaderMaterial({
-				    uniforms,
-				    vertexShader: `
-				varying vec3 vPos;                                                     
-				varying vec3 vWorldPosition;                                           
-				varying vec3 vNormal;                                                 
+				// Adding the sun to the scene
+				var sunGeometry = new THREE.IcosahedronGeometry( 20, 6 ); //new THREE.SphereGeometry( 8, 32, 32);
+				var sunMaterial = new THREE.ShaderMaterial({
+									uniforms: {
+										highlight: {value: new THREE.Color(highlight)},
+										highlightBlend: {value: new THREE.Color(highlightBlend)},
+										blend: {value: new THREE.Color(blend)},
+										innerGlow: {value: new THREE.Color(innerGlow)},
+										displacementSize: {value: noiseDisplacement},
+										noise_size: {value: noiseSize},
+										time: {value: 0}
+									},
+									vertexShader: document.getElementById('vertexShader').textContent,
+									fragmentShader: document.getElementById('fragmentShader').textContent,
+									side: THREE.DoubleSide
+								  });
+				var sun = new THREE.Mesh( sunGeometry, sunMaterial );
+				sun.overdraw = true;
+				sun.castShadow = true;
+				sun.receiveShadow = false; //default
+				scene.add( sun );
+				// <!------------------------------------------------------------------------------------------------->
 
-				${THREE.ShaderChunk["shadowmap_pars_vertex"]}                         
 
-				void main() {                                                         
-				  vPos = position;                                                     
-				  //vec4 worldPosition = (modelViewMatrix * vec4(position, 1.));         
-				  vec4 worldPosition = modelMatrix * vec4(position, 1.0);
+				// <!--------------------------------- ADDING PLANETS TO SOLAR SYSTEM -------------------------------->
 
-				  gl_Position = projectionMatrix * viewMatrix * vec4(worldPosition.xyz, 1.);       
 
-				  vNormal = normalMatrix * normal;                                     
-				  vWorldPosition = worldPosition.xyz;                                 
+				//Function that generates planets with images as textures
+					function generatePlanet(radius, text, posX, posY, posZ){
+						//Geometry
+						var geometry = new THREE.SphereGeometry( radius, 32, 32 ),
+							//Load texture
+							texture = new THREE.TextureLoader().load( text );
+						//Wrap texture
+						texture.wrapS = texture.wrapT = THREE.MirroredRepeatWrapping;
+						texture.repeat.set( 1, 1 );
+						//Mesh texture
+						var material = new THREE.MeshPhongMaterial( { map: texture } ),
+							planet = new THREE.Mesh( geometry, material );
+						//Shadows 
+						planet.castShadow = true; //default is false
+		  				planet.receiveShadow = false; //default
+						//Positions
+						planet.position.x = posX;
+						planet.position.y = posY;
+						planet.position.z = posZ;
+						scene.add(planet);	
 
-				  ${THREE.ShaderChunk["shadowmap_vertex"]}
-				}   
-				    `,
-				    fragmentShader: `
-				uniform sampler2D ringTexture;
-				uniform float innerRadius;
-				uniform float outerRadius;
-				uniform vec3 lightPosition;
+						return planet; 
+					}
 
-				varying vec3 vNormal;
-				varying vec3 vPos;
-				varying vec3 vWorldPosition;
+					//Function that generates planets rings with images as textures
+					function generatePlanetRing(inR, outR, thetaSeg, phiSeg,thetaStart, thetaLength, text, posX, posY, posZ){
+						//Geometry
+						var ringgeometry = new THREE.RingGeometry(inR, outR, thetaSeg, phiSeg, thetaStart, thetaLength),
+							//Load texture
+							texture = new THREE.TextureLoader().load( text );
 
-				${THREE.ShaderChunk["common"]}
-				${THREE.ShaderChunk["packing"]}
-				${THREE.ShaderChunk["bsdfs"]}
-				${THREE.ShaderChunk["lights_pars_begin"]}
-				${THREE.ShaderChunk["shadowmap_pars_fragment"]}
-				${THREE.ShaderChunk["shadowmask_pars_fragment"]}
+						const uniforms = THREE.UniformsUtils.merge([
+						    THREE.UniformsLib.ambient,
+						    THREE.UniformsLib.lights,
+						    THREE.UniformsLib.shadowmap,
+						    {
+						      ringTexture: { value: null },
+						      innerRadius: { value: 0 },
+						      outerRadius: { value: 0 },
+						      //lightPosition: { value: null }
+						    }
+						  ]);
+						  uniforms.ringTexture.value = texture;
+						  uniforms.innerRadius.value = inR;
+						  uniforms.outerRadius.value = outR;
+						  //uniforms.lightPosition.value = new THREE.Vector3(-5, 5, 1);
 
-				vec4 color() {
-				  vec2 uv = vec2(0);
-				  uv.x = (length(vPos) - innerRadius) / (outerRadius - innerRadius);
-				  if (uv.x < 0.0 || uv.x > 1.0) {
-				    discard;
-				  }                                                                           
-				  vec4 pixel = texture2D(ringTexture, uv);
-				  return pixel;
+						  const ringmaterial = new THREE.ShaderMaterial({
+						    uniforms,
+						    vertexShader: `
+								varying vec3 vPos;                                                     
+								//varying vec3 vWorldPosition;                                           
+								//varying vec3 vNormal;                                                 
+
+								${THREE.ShaderChunk["shadowmap_pars_vertex"]}                         
+
+								void main() {                                                         
+								  vPos = position;                                                     
+								  //vec4 worldPosition = (modelViewMatrix * vec4(position, 1.));         
+								  vec4 worldPosition = modelMatrix * vec4(position, 1.0);
+
+								  gl_Position = projectionMatrix * viewMatrix * vec4(worldPosition.xyz, 1.);       
+
+								  //vNormal = normalMatrix * normal;                                     
+								  //vWorldPosition = worldPosition.xyz;                                 
+
+								  ${THREE.ShaderChunk["shadowmap_vertex"]}
+								}   
+								    `,
+						    fragmentShader: `
+								uniform sampler2D ringTexture;
+								uniform float innerRadius;
+								uniform float outerRadius;
+								uniform vec3 lightPosition;
+
+								//varying vec3 vNormal;
+								varying vec3 vPos;
+								//varying vec3 vWorldPosition;
+
+								${THREE.ShaderChunk["common"]}
+								${THREE.ShaderChunk["packing"]}
+								${THREE.ShaderChunk["bsdfs"]}
+								${THREE.ShaderChunk["lights_pars_begin"]}
+								${THREE.ShaderChunk["shadowmap_pars_fragment"]}
+								${THREE.ShaderChunk["shadowmask_pars_fragment"]}
+
+								vec4 color() {
+								  vec2 uv = vec2(0);
+								  uv.x = (length(vPos) - innerRadius) / (outerRadius - innerRadius);
+								  if (uv.x < 0.0 || uv.x > 1.0) {
+								    discard;
+								  }                                                                           
+								  vec4 pixel = texture2D(ringTexture, uv);
+								  return pixel;
+								}
+
+								void main() {
+								  gl_FragColor = color() * vec4(vec3(getShadowMask()), 1.0);
+								}
+								    `,
+						    transparent: true,
+						    lights: true,
+						    side: THREE.DoubleSide,
+						  });
+							
+
+						var	ring = new THREE.Mesh( ringgeometry, ringmaterial );
+						ring.castShadow = true;
+		  				ring.receiveShadow = false;
+						//Positions
+						ring.position.x = posX;
+						ring.position.y = posY;
+						ring.position.z = posZ;
+						ring.rotation.x = 30;
+						scene.add(ring);
+
+						return ring; 
+					}
+
+					//Adding extra nine planets with image textures to scene
+					//Earth + Clouds
+					var geometryEarth = new THREE.SphereGeometry(1.4, 32, 32),
+						geometryClouds = new THREE.SphereGeometry(1.41, 32, 32),
+						materialEarth = new THREE.MeshPhongMaterial({
+							map 		: new THREE.TextureLoader().load('img/textures/earth.jpg'),
+							bumpMap 	: new THREE.TextureLoader().load('img/textures/earthbump.jpg'),
+							bumpScale 	: 0.05,
+							specularMap : new THREE.TextureLoader().load('img/textures/earthspec.jpg'),
+							specular 	: new THREE.Color('grey'),
+						}),
+						materialClouds  = new THREE.MeshPhongMaterial({
+							map     	: new THREE.TextureLoader().load('img/textures/earthcloud.jpg'),
+							side        : THREE.DoubleSide,
+							opacity     : 0.8,
+							transparent : true,
+							depthWrite  : false
+						}),
+						earth = new THREE.Mesh(geometryEarth, materialEarth),
+						clouds = new THREE.Mesh(geometryClouds, materialClouds);
+						earth.castShadow = true; //default is false
+						earth.receiveShadow = false; //default
+						clouds.castShadow = true; //default is false
+						clouds.receiveShadow = false; //default
+						earth.position.x = 47.4;
+						scene.add(earth);
+						earth.add(clouds);
+					var mercury = generatePlanet(0.8, "img/textures/mercury.jpg" , 40.6, 0, 0),
+						venus = generatePlanet(1.2, "img/textures/venus.jpg", 43.8, 0, 0),
+						moon = generatePlanet(0.6, "img/textures/moon.jpg", 47.4, 2, -2),
+						mars = generatePlanet(0.8, "img/textures/mars.jpg", 50.6, 0, 0),
+						jupiter = generatePlanet(2, "img/textures/jupiter.jpg", 54.4, 0, 0),
+						saturn = generatePlanet(1.9, "img/textures/saturn.jpg", 60.9, 0, 0),
+							saturnRing = generatePlanetRing(2.0, 3.6, 30, 30, 0, 6.3, "img/textures/saturn_ring.png", 60.9, 0, 0),
+						uranus = generatePlanet(1.8, "img/textures/uranus.jpg", 68.4, 0, 0),
+							uranusRing = generatePlanetRing(2.2, 3.2, 30, 30, 0, 6.3, "img/textures/uranus_ring.jpg", 68.4, 0, 0),
+						neptune = generatePlanet(1.8, "img/textures/neptune.jpg", 74.6, 0, 0);
+
+					// CREATING THE STARRY BACKGROUND
+					//Create particles
+					var particleCount = 2000,
+					    particles = new THREE.Geometry(),
+					    ptexture = new THREE.TextureLoader().load("img/textures/star.png"),
+					    pMaterial = new THREE.PointsMaterial({
+					      color: 0xFFFFFF,
+					      map: ptexture,
+					      transparent: true, 
+					      blending: THREE.AdditiveBlending,
+					      depthTest: true, 
+					      size: 2
+					});
+					//Create the individual particles
+					for (var p = 0; p < particleCount; p++) {
+					  //Create a particle with random x position (-120, 120)
+					  var pX = Math.random() * 240 - 120,
+					      pY = Math.random() * 240 - 120,
+					      pZ = Math.random() * 240 - 120,
+					      particle = new THREE.Vector3(pX, pY, pZ);
+
+					  particles.vertices.push(particle);
+					}
+					//Create the particle system
+					var particleSystem = new THREE.Points(particles, pMaterial);
+					particleSystem.sortParticles = true;
+					scene.add(particleSystem);
+				// <!------------------------------------------------------------------------------------------------->
+
+
+				// <!--------------------------------- CREATING GUI -------------------------------------------------->
+				var controller = new function() {
+				  this.positionX = cameraPosX;
+				  this.positionY = cameraPosY;
+				  this.positionZ = cameraPosZ;
+				  // Camera goes to planets position
+					  this.Sun = function () {
+					  	camera.position.x = cameraPosX;
+					    camera.position.y = cameraPosY;
+					    camera.position.z = cameraPosZ; 
+					  };
+					  this.Mercury = function () {
+					  	camera.position.x = mercury.position.x;
+					    camera.position.y = mercury.position.y;
+					    camera.position.z = mercury.position.z; 
+					  };
+					  this.Venus = function () {
+					  	camera.position.x = venus.position.x;
+					    camera.position.y = venus.position.y;
+					    camera.position.z = venus.position.z; 
+					  };
+					  this.Earth = function () {
+					  	camera.position.x = earth.position.x;
+					    camera.position.y = earth.position.y;
+					    camera.position.z = earth.position.z; 
+					  };
+					  this.Moon = function () {
+					  	camera.position.x = moon.position.x;
+					    camera.position.y = moon.position.y;
+					    camera.position.z = moon.position.z; 
+					  };
+					  this.Mars = function () {
+					  	camera.position.x = mars.position.x;
+					    camera.position.y = mars.position.y;
+					    camera.position.z = mars.position.z; 
+					  };
+					  this.Jupiter = function () {
+					  	camera.position.x = jupiter.position.x;
+					    camera.position.y = jupiter.position.y;
+					    camera.position.z = jupiter.position.z; 
+					  };
+					  this.Saturn = function () {
+					  	camera.position.x = saturn.position.x;
+					    camera.position.y = saturn.position.y;
+					    camera.position.z = saturn.position.z; 
+					  };
+					  this.Uranus = function () {
+					  	camera.position.x = uranus.position.x;
+					    camera.position.y = uranus.position.y;
+					    camera.position.z = uranus.position.z; 
+					  };
+					  this.Neptune = function () {
+					  	camera.position.x = neptune.position.x;
+					    camera.position.y = neptune.position.y;
+					    camera.position.z = neptune.position.z; 
+					  };
+				  this.orbitSpeed = 0;
+				  this.Highlight_Color = highlight;
+				  this.Blend_Color = blend;
+				  this.Inner_Glow = innerGlow;
+				  this.Glow_Size = 0; //glowSize
+				  this.Glow_Color = 0x000000; //glowColor
+				  this.Glow_Opacity = 1; //glowOpacity 
+				  this.Noise_Speed = noiseSpeed; 
+				  this.Noise_Size = noiseSize; 
+				  this.Noise_Displacement = noiseDisplacement; 
+				  this.Reset = function (){
+				  	//camera.position.x = cameraPosX;
+				    //camera.position.y = cameraPosY;
+				    //camera.position.z = cameraPosZ;
+				    orbitspeed = 0; 
+				    highlight = 0xcc9900;
+				    sunMaterial.uniforms.highlight = {value: new THREE.Color(highlight)};
+					blend = 0xff0000;
+					sunMaterial.uniforms.blend = {value: new THREE.Color(blend)};
+					innerGlow = 0x000000;
+					sunMaterial.uniforms.innerGlow = {value: new THREE.Color(innerGlow)};
+					//glowsize
+					//glowcolor
+					//glowopacity
+					noiseSpeed = .000020;
+					noiseSize = -0.10;
+					sunMaterial.uniforms.noise_size = {value: noiseSize}
+					noiseDisplacement = -0.30;
+					sunMaterial.uniforms.displacementSize = {value: noiseDisplacement};
+				  };
+
+				}();
+
+				var gui = new dat.GUI({name: 'Control the solar system'});
+				
+				// View all planets up close
+				var cameraPos = gui.addFolder('Camera position');
+					cameraPos.add(controller, 'positionX', -100, 100).onChange( function() {
+					   camera.position.x = controller.positionX;
+					}).name('X');
+					cameraPos.add(controller, 'positionY', -100, 100).onChange( function() {
+					   camera.position.y = controller.positionY;
+					}).name('Y');
+					cameraPos.add(controller, 'positionZ', -100, 100).onChange( function() {
+					   camera.position.z = controller.positionZ;
+					}).name('Z');
+					cameraPos.add( controller, 'Sun');
+					cameraPos.add( controller, 'Mercury');
+					cameraPos.add( controller, 'Venus');
+					cameraPos.add( controller, 'Earth');
+					cameraPos.add( controller, 'Moon');
+					cameraPos.add( controller, 'Mars');
+					cameraPos.add( controller, 'Jupiter');
+					cameraPos.add( controller, 'Saturn');
+					cameraPos.add( controller, 'Uranus');
+					cameraPos.add( controller, 'Neptune');
+
+				// Change orbits speed
+				gui.add( controller, 'orbitSpeed', 0, 1).onChange( function() {
+					orbitSpeed = (controller.orbitSpeed);
+				}).name('Orbit Speed');
+
+				// Color folder
+				var colorFolder = gui.addFolder('Colors of the sun');
+					colorFolder.addColor(controller, 'Highlight_Color', highlight ).onChange( function() {
+						highlight = controller.Highlight_Color;
+						sunMaterial.uniforms.highlight = {value: new THREE.Color(highlight)};
+					}).name('Highlight Color');
+					colorFolder.addColor(controller, 'Blend_Color', blend ).onChange( function() {
+						blend = controller.Blend_Color;
+						sunMaterial.uniforms.blend = {value: new THREE.Color(blend)};
+					}).name('Blending Color');
+					colorFolder.addColor(controller, 'Inner_Glow', innerGlow ).onChange( function() {
+						innerGlow = controller.Inner_Glow;
+						sunMaterial.uniforms.innerGlow = {value: new THREE.Color(innerGlow)};
+					}).name('Inner Glow');
+
+				// Glow folder
+				var glowFolder = gui.addFolder('Sun glow');
+					glowFolder.add( controller, 'Glow_Size', 0, 1 ).onChange( function() {
+				  		//sunMaterial.opacity = (controller.boxOpacity);
+					} ).name('Size');
+					glowFolder.addColor(controller, 'Glow_Color', highlight ).onChange( function() {
+						//highlight = controller.Glow_color;
+						//sunMaterial.uniforms.highlight = {value: new THREE.Color(highlight)};
+					}).name('Color');
+					glowFolder.add( controller, 'Glow_Opacity', 0.1, 1 ).onChange( function() {
+				  		//sunMaterial.opacity = (controller.boxOpacity);
+					} ).name('Opacity');
+
+				// Noise folder 
+				var noiseFolder = gui.addFolder('Sun noise');
+					noiseFolder.add( controller, 'Noise_Speed', 0.0, 0.0001).onChange( function() {
+						noiseSpeed = controller.Noise_Speed;
+					}).name('Speed');
+					noiseFolder.add( controller, 'Noise_Size', -1.0, -0.0).onChange( function() {
+						noiseSize = controller.Noise_Size;
+						sunMaterial.uniforms.noise_size = {value: noiseSize}
+					}).name('Size');
+					noiseFolder.add( controller, 'Noise_Displacement', -2.0, -0.0).onChange( function() {
+						noiseDisplacement = controller.Noise_Displacement;
+						sunMaterial.uniforms.displacementSize = {value: noiseDisplacement};
+					}).name('Displacement');
+
+				// Reset button
+				gui.add( controller, 'Reset').name('Reset settings');
+				// <!------------------------------------------------------------------------------------------------->
+
+
+				// <!--------------------------------- RENDERING SETTINGS -------------------------------------------->
+				// Window resize
+				function onWindowResize() {
+					renderer.setSize( width, height );
+					camera.aspect = ratio;
+					camera.updateProjectionMatrix();
 				}
 
-				void main() {
-				  gl_FragColor = color() * vec4(vec3(getShadowMask()), 1.0);
+				// Rendering
+				function render() {
+
+					// Rotations
+					particleSystem.rotation.y -= 0.001;
+					sun.rotation.y -= 0.001;
+					earth.rotation.y  -= 0.0005;
+					clouds.rotation.y  -= 0.001;
+					mercury.rotation.y  -= 0.001;				
+					venus.rotation.y  -= 0.001;
+					moon.rotation.y  -= 0.001;
+					mars.rotation.y  -= 0.001;
+					jupiter.rotation.y  -= 0.001;
+					saturn.rotation.y  -= 0.001;
+						saturnRing.rotation.z += 0.001;
+					uranus.rotation.y  -= 0.001;
+						uranusRing.rotation.z += 0.001;
+					neptune.rotation.y  -= 0.001;
+
+					// Adding noise movement
+					sunMaterial.uniforms[ 'time' ].value = noiseSpeed * ( Date.now() - start );
+
+					//controls.update();
+					requestAnimationFrame( render );
+					renderer.render( scene, camera );
+
 				}
-				    `,
-				    transparent: true,
-				    lights: true,
-				    side: THREE.DoubleSide,
-				  });
-					
 
-				var	ring = new THREE.Mesh( ringgeometry, ringmaterial );
-				ring.castShadow = true;
-  				ring.receiveShadow = true;
-				//Positions
-				ring.position.x = posX;
-				ring.position.y = posY;
-				ring.position.z = posZ;
-				ring.rotation.x = 30;
-				scene.add(ring);
+				window.addEventListener( 'resize', onWindowResize, false );
 
-				return ring; 
+				render();
+				// <!------------------------------------------------------------------------------------------------->
 			}
-
-			//Adding extra nine planets with image textures to scene
-			//Earth + Clouds
-			var geometryEarth = new THREE.SphereGeometry(1.4, 32, 32),
-				geometryClouds = new THREE.SphereGeometry(1.41, 32, 32),
-				materialEarth = new THREE.MeshPhongMaterial({
-					map 		: new THREE.TextureLoader().load('img/earth.jpg'),
-					bumpMap 	: new THREE.TextureLoader().load('img/earthbump.jpg'),
-					bumpScale 	: 0.05,
-					specularMap : new THREE.TextureLoader().load('img/earthspec.jpg'),
-					specular 	: new THREE.Color('grey'),
-				}),
-				materialClouds  = new THREE.MeshPhongMaterial({
-					map     	: new THREE.TextureLoader().load('img/earth_clouds.png'),
-					side        : THREE.DoubleSide,
-					opacity     : 0.8,
-					transparent : true,
-					depthWrite  : false
-				}),
-				earth = new THREE.Mesh(geometryEarth, materialEarth),
-				clouds = new THREE.Mesh(geometryClouds, materialClouds);
-				earth.position.x = 13.4;
-				scene.add(earth);
-				earth.add(clouds);
-			var mercury = generatePlanet(0.8, "img/mercury.jpg" , 6.8, 0, 0),
-				venus = generatePlanet(1.2, "img/venus.jpg", 9.8, 0, 0),
-				moon = generatePlanet(0.6, "img/moon.jpg", 13.4, 2, -2),
-				mars = generatePlanet(0.8, "img/mars.jpg", 16.6, 0, 0),
-				jupiter = generatePlanet(2, "img/jupiter.jpg", 20.4, 0, 0),
-				saturn = generatePlanet(1.9, "img/saturn.jpg", 26.9, 0, 0),
-					saturnRing = generatePlanetRing(2.0, 3.6, 30, 30, 0, 6.3, "img/saturn_ring.png", 26.9, 0, 0),
-				uranus = generatePlanet(1.8, "img/uranus.jpg", 34.4, 0, 0),
-					uranusRing = generatePlanetRing(2.2, 3.2, 30, 30, 0, 6.3, "img/uranus_ring.jpg", 34.4, 0, 0),
-				neptune = generatePlanet(1.8, "img/neptune.jpg", 40.6, 0, 0);
-
-			// CREATING THE STARRY BACKGROUND
-			//Create particles
-			var particleCount = 3000,
-			    particles = new THREE.Geometry(),
-			    ptexture = new THREE.TextureLoader().load("img/star.png"),
-			    pMaterial = new THREE.PointsMaterial({
-			      color: 0xFFFFFF,
-			      map: ptexture,
-			      transparent: true, 
-			      blending: THREE.AdditiveBlending,
-			      depthTest: true, 
-			      size: 2
-			});
-			//Create the individual particles
-			for (var p = 0; p < particleCount; p++) {
-			  //Create a particle with random x position (-120, 120)
-			  var pX = Math.random() * 240 - 120,
-			      pY = Math.random() * 240 - 120,
-			      pZ = Math.random() * 240 - 120,
-			      particle = new THREE.Vector3(pX, pY, pZ);
-
-			  particles.vertices.push(particle);
-			}
-			//Create the particle system
-			var particleSystem = new THREE.Points(particles, pMaterial);
-			particleSystem.sortParticles = true;
-			scene.add(particleSystem);
-
-			//RENDERING 
-			function animate() {
-
-				//Rotations
-				particleSystem.rotation.y -= 0.001;
-				mainPlanet.rotation.y -= 0.001;
-				earth.rotation.y  -= 0.0005;
-				clouds.rotation.y  -= 0.001;
-				mercury.rotation.y  -= 0.001;				
-				venus.rotation.y  -= 0.001;
-				moon.rotation.y  -= 0.001;
-				mars.rotation.y  -= 0.001;
-				jupiter.rotation.y  -= 0.001;
-				saturn.rotation.y  -= 0.001;
-					saturnRing.rotation.z += 0.001;
-				uranus.rotation.y  -= 0.001;
-					uranusRing.rotation.z += 0.001;
-				neptune.rotation.y  -= 0.001;
-
-				materialMain.uniforms[ 'time' ].value = .000015 * ( Date.now() - start );
-
-				requestAnimationFrame( animate );
-				renderer.render( scene, camera );
-			}
-			animate();
-
 		</script>
-
 	</body>
 </html>
