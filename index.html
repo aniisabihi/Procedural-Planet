@@ -23,193 +23,194 @@
   			<h3>Created by Aniisa Bihi</h3>
 		</div>
 
-		<!------------- ADDING NECCESARY SCRIPTS ------------
+		<!------------- ADDING NECCESARY SCRIPTS ------------->
 		<script src="js/three.min.js"></script>
-		<script src="js/OrbitControls.js"></script> -->
+		<script src="js/OrbitControls.js"></script> 
 		<script src="js/dat.gui.min.js"></script>
 
 
 		<!--------- VERTEX SHADER - FOR EDITABLE SUN --------->
 		<script type="x-shader/x-vertex" id="vertexShader">
-			//
-			// GLSL textureless classic 3D noise "cnoise",
-			// with an RSL-style periodic variant "pnoise".
-			// Author:  Stefan Gustavson (stefan.gustavson@liu.se)
-			// Version: 2011-10-11
-			//
-			// Many thanks to Ian McEwan of Ashima Arts for the
-			// ideas for permutation and gradient selection.
-			//
-			// Copyright (c) 2011 Stefan Gustavson. All rights reserved.
-			// Distributed under the MIT license. See LICENSE file.
-			// https://github.com/stegu/webgl-noise
-			//
+			
+			// ---------------------------- NOISE --------------------------->
+				//
+				// GLSL textureless classic 3D noise "cnoise",
+				// with an RSL-style periodic variant "pnoise".
+				// Author:  Stefan Gustavson (stefan.gustavson@liu.se)
+				// Version: 2011-10-11
+				//
+				// Many thanks to Ian McEwan of Ashima Arts for the
+				// ideas for permutation and gradient selection.
+				//
+				// Copyright (c) 2011 Stefan Gustavson. All rights reserved.
+				// Distributed under the MIT license. See LICENSE file.
+				// https://github.com/stegu/webgl-noise
+				//
 
-			vec3 mod289(vec3 x)
-			{
-			  return x - floor(x * (1.0 / 289.0)) * 289.0;
-			}
+				vec3 mod289(vec3 x)
+				{
+				  return x - floor(x * (1.0 / 289.0)) * 289.0;
+				}
 
-			vec4 mod289(vec4 x)
-			{
-			  return x - floor(x * (1.0 / 289.0)) * 289.0;
-			}
+				vec4 mod289(vec4 x)
+				{
+				  return x - floor(x * (1.0 / 289.0)) * 289.0;
+				}
 
-			vec4 permute(vec4 x)
-			{
-			  return mod289(((x*34.0)+1.0)*x);
-			}
+				vec4 permute(vec4 x)
+				{
+				  return mod289(((x*34.0)+1.0)*x);
+				}
 
-			vec4 taylorInvSqrt(vec4 r)
-			{
-			  return 1.79284291400159 - 0.85373472095314 * r;
-			}
+				vec4 taylorInvSqrt(vec4 r)
+				{
+				  return 1.79284291400159 - 0.85373472095314 * r;
+				}
 
-			vec3 fade(vec3 t) {
-			  return t*t*t*(t*(t*6.0-15.0)+10.0);
-			}
+				vec3 fade(vec3 t) {
+				  return t*t*t*(t*(t*6.0-15.0)+10.0);
+				}
 
-			// Classic Perlin noise
-			float cnoise(vec3 P)
-			{
-			  vec3 Pi0 = floor(P); // Integer part for indexing
-			  vec3 Pi1 = Pi0 + vec3(1.0); // Integer part + 1
-			  Pi0 = mod289(Pi0);
-			  Pi1 = mod289(Pi1);
-			  vec3 Pf0 = fract(P); // Fractional part for interpolation
-			  vec3 Pf1 = Pf0 - vec3(1.0); // Fractional part - 1.0
-			  vec4 ix = vec4(Pi0.x, Pi1.x, Pi0.x, Pi1.x);
-			  vec4 iy = vec4(Pi0.yy, Pi1.yy);
-			  vec4 iz0 = Pi0.zzzz;
-			  vec4 iz1 = Pi1.zzzz;
+				// Classic Perlin noise
+				float cnoise(vec3 P)
+				{
+				  vec3 Pi0 = floor(P); // Integer part for indexing
+				  vec3 Pi1 = Pi0 + vec3(1.0); // Integer part + 1
+				  Pi0 = mod289(Pi0);
+				  Pi1 = mod289(Pi1);
+				  vec3 Pf0 = fract(P); // Fractional part for interpolation
+				  vec3 Pf1 = Pf0 - vec3(1.0); // Fractional part - 1.0
+				  vec4 ix = vec4(Pi0.x, Pi1.x, Pi0.x, Pi1.x);
+				  vec4 iy = vec4(Pi0.yy, Pi1.yy);
+				  vec4 iz0 = Pi0.zzzz;
+				  vec4 iz1 = Pi1.zzzz;
 
-			  vec4 ixy = permute(permute(ix) + iy);
-			  vec4 ixy0 = permute(ixy + iz0);
-			  vec4 ixy1 = permute(ixy + iz1);
+				  vec4 ixy = permute(permute(ix) + iy);
+				  vec4 ixy0 = permute(ixy + iz0);
+				  vec4 ixy1 = permute(ixy + iz1);
 
-			  vec4 gx0 = ixy0 * (1.0 / 7.0);
-			  vec4 gy0 = fract(floor(gx0) * (1.0 / 7.0)) - 0.5;
-			  gx0 = fract(gx0);
-			  vec4 gz0 = vec4(0.5) - abs(gx0) - abs(gy0);
-			  vec4 sz0 = step(gz0, vec4(0.0));
-			  gx0 -= sz0 * (step(0.0, gx0) - 0.5);
-			  gy0 -= sz0 * (step(0.0, gy0) - 0.5);
+				  vec4 gx0 = ixy0 * (1.0 / 7.0);
+				  vec4 gy0 = fract(floor(gx0) * (1.0 / 7.0)) - 0.5;
+				  gx0 = fract(gx0);
+				  vec4 gz0 = vec4(0.5) - abs(gx0) - abs(gy0);
+				  vec4 sz0 = step(gz0, vec4(0.0));
+				  gx0 -= sz0 * (step(0.0, gx0) - 0.5);
+				  gy0 -= sz0 * (step(0.0, gy0) - 0.5);
 
-			  vec4 gx1 = ixy1 * (1.0 / 7.0);
-			  vec4 gy1 = fract(floor(gx1) * (1.0 / 7.0)) - 0.5;
-			  gx1 = fract(gx1);
-			  vec4 gz1 = vec4(0.5) - abs(gx1) - abs(gy1);
-			  vec4 sz1 = step(gz1, vec4(0.0));
-			  gx1 -= sz1 * (step(0.0, gx1) - 0.5);
-			  gy1 -= sz1 * (step(0.0, gy1) - 0.5);
+				  vec4 gx1 = ixy1 * (1.0 / 7.0);
+				  vec4 gy1 = fract(floor(gx1) * (1.0 / 7.0)) - 0.5;
+				  gx1 = fract(gx1);
+				  vec4 gz1 = vec4(0.5) - abs(gx1) - abs(gy1);
+				  vec4 sz1 = step(gz1, vec4(0.0));
+				  gx1 -= sz1 * (step(0.0, gx1) - 0.5);
+				  gy1 -= sz1 * (step(0.0, gy1) - 0.5);
 
-			  vec3 g000 = vec3(gx0.x,gy0.x,gz0.x);
-			  vec3 g100 = vec3(gx0.y,gy0.y,gz0.y);
-			  vec3 g010 = vec3(gx0.z,gy0.z,gz0.z);
-			  vec3 g110 = vec3(gx0.w,gy0.w,gz0.w);
-			  vec3 g001 = vec3(gx1.x,gy1.x,gz1.x);
-			  vec3 g101 = vec3(gx1.y,gy1.y,gz1.y);
-			  vec3 g011 = vec3(gx1.z,gy1.z,gz1.z);
-			  vec3 g111 = vec3(gx1.w,gy1.w,gz1.w);
+				  vec3 g000 = vec3(gx0.x,gy0.x,gz0.x);
+				  vec3 g100 = vec3(gx0.y,gy0.y,gz0.y);
+				  vec3 g010 = vec3(gx0.z,gy0.z,gz0.z);
+				  vec3 g110 = vec3(gx0.w,gy0.w,gz0.w);
+				  vec3 g001 = vec3(gx1.x,gy1.x,gz1.x);
+				  vec3 g101 = vec3(gx1.y,gy1.y,gz1.y);
+				  vec3 g011 = vec3(gx1.z,gy1.z,gz1.z);
+				  vec3 g111 = vec3(gx1.w,gy1.w,gz1.w);
 
-			  vec4 norm0 = taylorInvSqrt(vec4(dot(g000, g000), dot(g010, g010), dot(g100, g100), dot(g110, g110)));
-			  g000 *= norm0.x;
-			  g010 *= norm0.y;
-			  g100 *= norm0.z;
-			  g110 *= norm0.w;
-			  vec4 norm1 = taylorInvSqrt(vec4(dot(g001, g001), dot(g011, g011), dot(g101, g101), dot(g111, g111)));
-			  g001 *= norm1.x;
-			  g011 *= norm1.y;
-			  g101 *= norm1.z;
-			  g111 *= norm1.w;
+				  vec4 norm0 = taylorInvSqrt(vec4(dot(g000, g000), dot(g010, g010), dot(g100, g100), dot(g110, g110)));
+				  g000 *= norm0.x;
+				  g010 *= norm0.y;
+				  g100 *= norm0.z;
+				  g110 *= norm0.w;
+				  vec4 norm1 = taylorInvSqrt(vec4(dot(g001, g001), dot(g011, g011), dot(g101, g101), dot(g111, g111)));
+				  g001 *= norm1.x;
+				  g011 *= norm1.y;
+				  g101 *= norm1.z;
+				  g111 *= norm1.w;
 
-			  float n000 = dot(g000, Pf0);
-			  float n100 = dot(g100, vec3(Pf1.x, Pf0.yz));
-			  float n010 = dot(g010, vec3(Pf0.x, Pf1.y, Pf0.z));
-			  float n110 = dot(g110, vec3(Pf1.xy, Pf0.z));
-			  float n001 = dot(g001, vec3(Pf0.xy, Pf1.z));
-			  float n101 = dot(g101, vec3(Pf1.x, Pf0.y, Pf1.z));
-			  float n011 = dot(g011, vec3(Pf0.x, Pf1.yz));
-			  float n111 = dot(g111, Pf1);
+				  float n000 = dot(g000, Pf0);
+				  float n100 = dot(g100, vec3(Pf1.x, Pf0.yz));
+				  float n010 = dot(g010, vec3(Pf0.x, Pf1.y, Pf0.z));
+				  float n110 = dot(g110, vec3(Pf1.xy, Pf0.z));
+				  float n001 = dot(g001, vec3(Pf0.xy, Pf1.z));
+				  float n101 = dot(g101, vec3(Pf1.x, Pf0.y, Pf1.z));
+				  float n011 = dot(g011, vec3(Pf0.x, Pf1.yz));
+				  float n111 = dot(g111, Pf1);
 
-			  vec3 fade_xyz = fade(Pf0);
-			  vec4 n_z = mix(vec4(n000, n100, n010, n110), vec4(n001, n101, n011, n111), fade_xyz.z);
-			  vec2 n_yz = mix(n_z.xy, n_z.zw, fade_xyz.y);
-			  float n_xyz = mix(n_yz.x, n_yz.y, fade_xyz.x); 
-			  return 2.2 * n_xyz;
-			}
+				  vec3 fade_xyz = fade(Pf0);
+				  vec4 n_z = mix(vec4(n000, n100, n010, n110), vec4(n001, n101, n011, n111), fade_xyz.z);
+				  vec2 n_yz = mix(n_z.xy, n_z.zw, fade_xyz.y);
+				  float n_xyz = mix(n_yz.x, n_yz.y, fade_xyz.x); 
+				  return 2.2 * n_xyz;
+				}
 
-			// Classic Perlin noise, periodic variant
-			float pnoise(vec3 P, vec3 rep)
-			{
-			  vec3 Pi0 = mod(floor(P), rep); // Integer part, modulo period
-			  vec3 Pi1 = mod(Pi0 + vec3(1.0), rep); // Integer part + 1, mod period
-			  Pi0 = mod289(Pi0);
-			  Pi1 = mod289(Pi1);
-			  vec3 Pf0 = fract(P); // Fractional part for interpolation
-			  vec3 Pf1 = Pf0 - vec3(1.0); // Fractional part - 1.0
-			  vec4 ix = vec4(Pi0.x, Pi1.x, Pi0.x, Pi1.x);
-			  vec4 iy = vec4(Pi0.yy, Pi1.yy);
-			  vec4 iz0 = Pi0.zzzz;
-			  vec4 iz1 = Pi1.zzzz;
+				// Classic Perlin noise, periodic variant
+				float pnoise(vec3 P, vec3 rep)
+				{
+				  vec3 Pi0 = mod(floor(P), rep); // Integer part, modulo period
+				  vec3 Pi1 = mod(Pi0 + vec3(1.0), rep); // Integer part + 1, mod period
+				  Pi0 = mod289(Pi0);
+				  Pi1 = mod289(Pi1);
+				  vec3 Pf0 = fract(P); // Fractional part for interpolation
+				  vec3 Pf1 = Pf0 - vec3(1.0); // Fractional part - 1.0
+				  vec4 ix = vec4(Pi0.x, Pi1.x, Pi0.x, Pi1.x);
+				  vec4 iy = vec4(Pi0.yy, Pi1.yy);
+				  vec4 iz0 = Pi0.zzzz;
+				  vec4 iz1 = Pi1.zzzz;
 
-			  vec4 ixy = permute(permute(ix) + iy);
-			  vec4 ixy0 = permute(ixy + iz0);
-			  vec4 ixy1 = permute(ixy + iz1);
+				  vec4 ixy = permute(permute(ix) + iy);
+				  vec4 ixy0 = permute(ixy + iz0);
+				  vec4 ixy1 = permute(ixy + iz1);
 
-			  vec4 gx0 = ixy0 * (1.0 / 7.0);
-			  vec4 gy0 = fract(floor(gx0) * (1.0 / 7.0)) - 0.5;
-			  gx0 = fract(gx0);
-			  vec4 gz0 = vec4(0.5) - abs(gx0) - abs(gy0);
-			  vec4 sz0 = step(gz0, vec4(0.0));
-			  gx0 -= sz0 * (step(0.0, gx0) - 0.5);
-			  gy0 -= sz0 * (step(0.0, gy0) - 0.5);
+				  vec4 gx0 = ixy0 * (1.0 / 7.0);
+				  vec4 gy0 = fract(floor(gx0) * (1.0 / 7.0)) - 0.5;
+				  gx0 = fract(gx0);
+				  vec4 gz0 = vec4(0.5) - abs(gx0) - abs(gy0);
+				  vec4 sz0 = step(gz0, vec4(0.0));
+				  gx0 -= sz0 * (step(0.0, gx0) - 0.5);
+				  gy0 -= sz0 * (step(0.0, gy0) - 0.5);
 
-			  vec4 gx1 = ixy1 * (1.0 / 7.0);
-			  vec4 gy1 = fract(floor(gx1) * (1.0 / 7.0)) - 0.5;
-			  gx1 = fract(gx1);
-			  vec4 gz1 = vec4(0.5) - abs(gx1) - abs(gy1);
-			  vec4 sz1 = step(gz1, vec4(0.0));
-			  gx1 -= sz1 * (step(0.0, gx1) - 0.5);
-			  gy1 -= sz1 * (step(0.0, gy1) - 0.5);
+				  vec4 gx1 = ixy1 * (1.0 / 7.0);
+				  vec4 gy1 = fract(floor(gx1) * (1.0 / 7.0)) - 0.5;
+				  gx1 = fract(gx1);
+				  vec4 gz1 = vec4(0.5) - abs(gx1) - abs(gy1);
+				  vec4 sz1 = step(gz1, vec4(0.0));
+				  gx1 -= sz1 * (step(0.0, gx1) - 0.5);
+				  gy1 -= sz1 * (step(0.0, gy1) - 0.5);
 
-			  vec3 g000 = vec3(gx0.x,gy0.x,gz0.x);
-			  vec3 g100 = vec3(gx0.y,gy0.y,gz0.y);
-			  vec3 g010 = vec3(gx0.z,gy0.z,gz0.z);
-			  vec3 g110 = vec3(gx0.w,gy0.w,gz0.w);
-			  vec3 g001 = vec3(gx1.x,gy1.x,gz1.x);
-			  vec3 g101 = vec3(gx1.y,gy1.y,gz1.y);
-			  vec3 g011 = vec3(gx1.z,gy1.z,gz1.z);
-			  vec3 g111 = vec3(gx1.w,gy1.w,gz1.w);
+				  vec3 g000 = vec3(gx0.x,gy0.x,gz0.x);
+				  vec3 g100 = vec3(gx0.y,gy0.y,gz0.y);
+				  vec3 g010 = vec3(gx0.z,gy0.z,gz0.z);
+				  vec3 g110 = vec3(gx0.w,gy0.w,gz0.w);
+				  vec3 g001 = vec3(gx1.x,gy1.x,gz1.x);
+				  vec3 g101 = vec3(gx1.y,gy1.y,gz1.y);
+				  vec3 g011 = vec3(gx1.z,gy1.z,gz1.z);
+				  vec3 g111 = vec3(gx1.w,gy1.w,gz1.w);
 
-			  vec4 norm0 = taylorInvSqrt(vec4(dot(g000, g000), dot(g010, g010), dot(g100, g100), dot(g110, g110)));
-			  g000 *= norm0.x;
-			  g010 *= norm0.y;
-			  g100 *= norm0.z;
-			  g110 *= norm0.w;
-			  vec4 norm1 = taylorInvSqrt(vec4(dot(g001, g001), dot(g011, g011), dot(g101, g101), dot(g111, g111)));
-			  g001 *= norm1.x;
-			  g011 *= norm1.y;
-			  g101 *= norm1.z;
-			  g111 *= norm1.w;
+				  vec4 norm0 = taylorInvSqrt(vec4(dot(g000, g000), dot(g010, g010), dot(g100, g100), dot(g110, g110)));
+				  g000 *= norm0.x;
+				  g010 *= norm0.y;
+				  g100 *= norm0.z;
+				  g110 *= norm0.w;
+				  vec4 norm1 = taylorInvSqrt(vec4(dot(g001, g001), dot(g011, g011), dot(g101, g101), dot(g111, g111)));
+				  g001 *= norm1.x;
+				  g011 *= norm1.y;
+				  g101 *= norm1.z;
+				  g111 *= norm1.w;
 
-			  float n000 = dot(g000, Pf0);
-			  float n100 = dot(g100, vec3(Pf1.x, Pf0.yz));
-			  float n010 = dot(g010, vec3(Pf0.x, Pf1.y, Pf0.z));
-			  float n110 = dot(g110, vec3(Pf1.xy, Pf0.z));
-			  float n001 = dot(g001, vec3(Pf0.xy, Pf1.z));
-			  float n101 = dot(g101, vec3(Pf1.x, Pf0.y, Pf1.z));
-			  float n011 = dot(g011, vec3(Pf0.x, Pf1.yz));
-			  float n111 = dot(g111, Pf1);
+				  float n000 = dot(g000, Pf0);
+				  float n100 = dot(g100, vec3(Pf1.x, Pf0.yz));
+				  float n010 = dot(g010, vec3(Pf0.x, Pf1.y, Pf0.z));
+				  float n110 = dot(g110, vec3(Pf1.xy, Pf0.z));
+				  float n001 = dot(g001, vec3(Pf0.xy, Pf1.z));
+				  float n101 = dot(g101, vec3(Pf1.x, Pf0.y, Pf1.z));
+				  float n011 = dot(g011, vec3(Pf0.x, Pf1.yz));
+				  float n111 = dot(g111, Pf1);
 
-			  vec3 fade_xyz = fade(Pf0);
-			  vec4 n_z = mix(vec4(n000, n100, n010, n110), vec4(n001, n101, n011, n111), fade_xyz.z);
-			  vec2 n_yz = mix(n_z.xy, n_z.zw, fade_xyz.y);
-			  float n_xyz = mix(n_yz.x, n_yz.y, fade_xyz.x); 
-			  return 2.2 * n_xyz;
-			}
-			//
-			//
+				  vec3 fade_xyz = fade(Pf0);
+				  vec4 n_z = mix(vec4(n000, n100, n010, n110), vec4(n001, n101, n011, n111), fade_xyz.z);
+				  vec2 n_yz = mix(n_z.xy, n_z.zw, fade_xyz.y);
+				  float n_xyz = mix(n_yz.x, n_yz.y, fade_xyz.x); 
+				  return 2.2 * n_xyz;
+				}
+			// -------------------------------------------------------------->
 
 			varying float noise;
 			varying float noise2; 
@@ -267,7 +268,7 @@
 
 			import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.112.0/build/three.module.js";
 		    import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.112.0/examples/jsm/controls/OrbitControls.js";
-		    //import {color, controllers, dom, gui, GUI} from "js/dat.gui.module.js";
+		    import {color, controllers, dom, gui, GUI} from "./js/dat.gui.module.js";
 
 			var container, renderer, scene,
 				camera, mesh, fov = 45, 
@@ -283,471 +284,465 @@
 
 			function init() {
 
-				// <!--------------------------------- SETTING UP SCENE ---------------------------------------------->
-					container = document.getElementById( 'container' );
+			// <!--------------------------------- SETTING UP SCENE ---------------------------------------------->
+				
+				container = document.getElementById( 'container' );
 
-					scene = new THREE.Scene();
-					renderer = new THREE.WebGLRenderer( {antialias:true});
-					renderer.setPixelRatio( window.devicePixelRatio );
-					renderer.setSize( width, height);
-					renderer.autoClear = false;
-					container.appendChild( renderer.domElement );
+				scene = new THREE.Scene();
+				renderer = new THREE.WebGLRenderer( {antialias:true});
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setSize( width, height);
+				renderer.autoClear = false;
+				container.appendChild( renderer.domElement );
 
-					// Setting up camera
-					camera = new THREE.PerspectiveCamera( fov, ratio, 1, 10000 );
-					camera.position.x = cameraPosX;
-					camera.position.y = cameraPosY;
-					camera.position.z = cameraPosZ;
-					camera.target = new THREE.Vector3( 0, 0, 0 );
-					scene.add( camera );
-					// Give user control of camera
-					var controls = new OrbitControls( camera, renderer.domElement );
-
-				// <!------------------------------------------------------------------------------------------------->
-
-
-				// <!--------------------------------- MAIN GUI EDITABLE PLANET -------------------------------------->
-
-					// Sunlight 
-					var lightColor = 0xffffff,
-						lightIntensity = 1.0,
-						lightDistance = 0.0, 
-						lightDecay = 2.0, 
-						sunlight = new THREE.PointLight( lightColor, lightIntensity, lightDistance, lightDecay);
-					sunlight.power = lightIntensity * 4 * Math.PI; 
-					sunlight.castShadow = true;
-					sunlight.position.set( 0, 0, 0 );
-					scene.add( sunlight );
-
-					// The colors of the sun
-					var highlight = 0xcc9900, 
-						highlightBlend = 0xe65c00,
-						blend = 0xff0000,
-						innerGlow = 0x000000;
-
-					// The parameters of the noise
-					var noiseSpeed = .000020,
-						noiseSize = -0.10,
-						noiseDisplacement = -0.30;
-
-					// Adding the sun to the scene
-					var sunGeometry = new THREE.IcosahedronGeometry( 20, 6 ); //new THREE.SphereGeometry( 8, 32, 32);
-					var sunMaterial = new THREE.ShaderMaterial({
-										uniforms: {
-											highlight: {value: new THREE.Color(highlight)},
-											highlightBlend: {value: new THREE.Color(highlightBlend)},
-											blend: {value: new THREE.Color(blend)},
-											innerGlow: {value: new THREE.Color(innerGlow)},
-											displacementSize: {value: noiseDisplacement},
-											noise_size: {value: noiseSize},
-											time: {value: 0}
-										},
-										vertexShader: document.getElementById('vertexShader').textContent,
-										fragmentShader: document.getElementById('fragmentShader').textContent,
-										side: THREE.DoubleSide
-									  });
-					var sun = new THREE.Mesh( sunGeometry, sunMaterial );
-					sun.overdraw = true;
-					sun.castShadow = true;
-					sun.receiveShadow = false; //default
-					scene.add( sun );
-				// <!------------------------------------------------------------------------------------------------->
+				// Setting up camera
+				camera = new THREE.PerspectiveCamera( fov, ratio, 1, 10000 );
+				camera.position.x = cameraPosX;
+				camera.position.y = cameraPosY;
+				camera.position.z = cameraPosZ;
+				camera.target = new THREE.Vector3( 0, 0, 0 );
+				scene.add( camera );
+				var controls = new OrbitControls( camera, renderer.domElement ); // Give user control of camera
+			// <!------------------------------------------------------------------------------------------------->
 
 
-				// <!--------------------------------- ADDING PLANETS TO SOLAR SYSTEM -------------------------------->
+			// <!--------------------------------- MAIN GUI EDITABLE PLANET -------------------------------------->
 
-					//Function that generates planets with images as textures
-					function generatePlanet(radius, text, posX, posY, posZ){
-						//Geometry
-						var geometry = new THREE.SphereGeometry( radius, 32, 32 ),
-							//Load texture
-							texture = new THREE.TextureLoader().load( text );
-						//Wrap texture
-						texture.wrapS = texture.wrapT = THREE.MirroredRepeatWrapping;
-						texture.repeat.set( 1, 1 );
-						//Mesh texture
-						var material = new THREE.MeshPhongMaterial( { map: texture } ),
-							planet = new THREE.Mesh( geometry, material );
-						//Shadows 
-						planet.castShadow = true; //default is false
-		  				planet.receiveShadow = false; //default
-						//Positions
-						planet.position.x = posX;
-						planet.position.y = posY;
-						planet.position.z = posZ;
-						scene.add(planet);	
+				// Sunlight 
+				var lightColor = 0xffffff,
+					lightIntensity = 1.0,
+					lightDistance = 0.0, 
+					lightDecay = 2.0, 
+					sunlight = new THREE.PointLight( lightColor, lightIntensity, lightDistance, lightDecay);
+				sunlight.power = lightIntensity * 4 * Math.PI; 
+				sunlight.castShadow = true;
+				sunlight.position.set( 0, 0, 0 );
+				scene.add( sunlight );
 
-						return planet; 
-					}
+				// The colors of the sun
+				var highlight = 0xcc9900, 
+					highlightBlend = 0xe65c00,
+					blend = 0xff0000,
+					innerGlow = 0x000000;
 
-					//Function that generates planets rings with images as textures
-					function generatePlanetRing(inR, outR, thetaSeg, phiSeg,thetaStart, thetaLength, text, posX, posY, posZ){
-						//Geometry
-						var ringgeometry = new THREE.RingGeometry(inR, outR, thetaSeg, phiSeg, thetaStart, thetaLength),
-							//Load texture
-							texture = new THREE.TextureLoader().load( text );
+				// The parameters of the noise
+				var noiseSpeed = .000020,
+					noiseSize = -0.10,
+					noiseDisplacement = -0.30;
 
-						const uniforms = THREE.UniformsUtils.merge([
-						    THREE.UniformsLib.ambient,
-						    THREE.UniformsLib.lights,
-						    THREE.UniformsLib.shadowmap,
-						    {
-						      ringTexture: { value: null },
-						      innerRadius: { value: 0 },
-						      outerRadius: { value: 0 },
-						      //lightPosition: { value: null }
-						    }
-						  ]);
-						  uniforms.ringTexture.value = texture;
-						  uniforms.innerRadius.value = inR;
-						  uniforms.outerRadius.value = outR;
-						  //uniforms.lightPosition.value = new THREE.Vector3(-5, 5, 1);
-
-						  const ringmaterial = new THREE.ShaderMaterial({
-						    uniforms,
-						    vertexShader: `
-								varying vec3 vPos;                                                     
-								//varying vec3 vWorldPosition;                                           
-								//varying vec3 vNormal;                                                 
-
-								${THREE.ShaderChunk["shadowmap_pars_vertex"]}                         
-
-								void main() {                                                         
-								  vPos = position;                                                     
-								  //vec4 worldPosition = (modelViewMatrix * vec4(position, 1.));         
-								  vec4 worldPosition = modelMatrix * vec4(position, 1.0);
-
-								  gl_Position = projectionMatrix * viewMatrix * vec4(worldPosition.xyz, 1.);       
-
-								  //vNormal = normalMatrix * normal;                                     
-								  //vWorldPosition = worldPosition.xyz;                                 
-
-								  ${THREE.ShaderChunk["shadowmap_vertex"]}
-								}   
-								    `,
-						    fragmentShader: `
-								uniform sampler2D ringTexture;
-								uniform float innerRadius;
-								uniform float outerRadius;
-								uniform vec3 lightPosition;
-
-								//varying vec3 vNormal;
-								varying vec3 vPos;
-								//varying vec3 vWorldPosition;
-
-								${THREE.ShaderChunk["common"]}
-								${THREE.ShaderChunk["packing"]}
-								${THREE.ShaderChunk["bsdfs"]}
-								${THREE.ShaderChunk["lights_pars_begin"]}
-								${THREE.ShaderChunk["shadowmap_pars_fragment"]}
-								${THREE.ShaderChunk["shadowmask_pars_fragment"]}
-
-								vec4 color() {
-								  vec2 uv = vec2(0);
-								  uv.x = (length(vPos) - innerRadius) / (outerRadius - innerRadius);
-								  if (uv.x < 0.0 || uv.x > 1.0) {
-								    discard;
-								  }                                                                           
-								  vec4 pixel = texture2D(ringTexture, uv);
-								  return pixel;
-								}
-
-								void main() {
-								  gl_FragColor = color() * vec4(vec3(getShadowMask()), 1.0);
-								}
-								    `,
-						    transparent: true,
-						    lights: true,
-						    side: THREE.DoubleSide,
-						  });
-							
-
-						var	ring = new THREE.Mesh( ringgeometry, ringmaterial );
-						ring.castShadow = true;
-		  				ring.receiveShadow = false;
-						//Positions
-						ring.position.x = posX;
-						ring.position.y = posY;
-						ring.position.z = posZ;
-						ring.rotation.x = 30;
-						scene.add(ring);
-
-						return ring; 
-					}
-
-					//Adding extra nine planets with image textures to scene
-					//Earth + Clouds
-					var geometryEarth = new THREE.SphereGeometry(1.4, 32, 32),
-						geometryClouds = new THREE.SphereGeometry(1.41, 32, 32),
-						materialEarth = new THREE.MeshPhongMaterial({
-							map 		: new THREE.TextureLoader().load('img/textures/earth.jpg'),
-							bumpMap 	: new THREE.TextureLoader().load('img/textures/earthbump.jpg'),
-							bumpScale 	: 0.05,
-							specularMap : new THREE.TextureLoader().load('img/textures/earthspec.jpg'),
-							specular 	: new THREE.Color('grey'),
-						}),
-						materialClouds  = new THREE.MeshPhongMaterial({
-							map     	: new THREE.TextureLoader().load('img/textures/earthcloud.jpg'),
-							side        : THREE.DoubleSide,
-							opacity     : 0.8,
-							transparent : true,
-							depthWrite  : false
-						}),
-						earth = new THREE.Mesh(geometryEarth, materialEarth),
-						clouds = new THREE.Mesh(geometryClouds, materialClouds);
-						earth.castShadow = true; //default is false
-						earth.receiveShadow = false; //default
-						clouds.castShadow = true; //default is false
-						clouds.receiveShadow = false; //default
-						earth.position.x = 47.4;
-						scene.add(earth);
-						earth.add(clouds);
-					var mercury = generatePlanet(0.8, "img/textures/mercury.jpg" , 40.6, 0, 0),
-						venus = generatePlanet(1.2, "img/textures/venus.jpg", 43.8, 0, 0),
-						moon = generatePlanet(0.6, "img/textures/moon.jpg", 47.4, 2, -2),
-						mars = generatePlanet(0.8, "img/textures/mars.jpg", 50.6, 0, 0),
-						jupiter = generatePlanet(2, "img/textures/jupiter.jpg", 54.4, 0, 0),
-						saturn = generatePlanet(1.9, "img/textures/saturn.jpg", 60.9, 0, 0),
-							saturnRing = generatePlanetRing(2.0, 3.6, 30, 30, 0, 6.3, "img/textures/saturn_ring.png", 60.9, 0, 0),
-						uranus = generatePlanet(1.8, "img/textures/uranus.jpg", 68.4, 0, 0),
-							uranusRing = generatePlanetRing(2.2, 3.2, 30, 30, 0, 6.3, "img/textures/uranus_ring.jpg", 68.4, 0, 0),
-						neptune = generatePlanet(1.8, "img/textures/neptune.jpg", 74.6, 0, 0);
-
-					// CREATING THE STARRY BACKGROUND
-					//Create particles
-					var particleCount = 2000,
-					    particles = new THREE.Geometry(),
-					    ptexture = new THREE.TextureLoader().load("img/textures/star.png"),
-					    pMaterial = new THREE.PointsMaterial({
-					      color: 0xFFFFFF,
-					      map: ptexture,
-					      transparent: true, 
-					      blending: THREE.AdditiveBlending,
-					      depthTest: true, 
-					      size: 2
-					});
-					//Create the individual particles
-					for (var p = 0; p < particleCount; p++) {
-					  //Create a particle with random x position (-120, 120)
-					  var pX = Math.random() * 240 - 120,
-					      pY = Math.random() * 240 - 120,
-					      pZ = Math.random() * 240 - 120,
-					      particle = new THREE.Vector3(pX, pY, pZ);
-
-					  particles.vertices.push(particle);
-					}
-					//Create the particle system
-					var particleSystem = new THREE.Points(particles, pMaterial);
-					particleSystem.sortParticles = true;
-					scene.add(particleSystem);
-				// <!------------------------------------------------------------------------------------------------->
+				// Adding the sun to the scene
+				var sunGeometry = new THREE.IcosahedronGeometry( 20, 6 ); //new THREE.SphereGeometry( 8, 32, 32);
+				var sunMaterial = new THREE.ShaderMaterial({
+									uniforms: {
+										highlight: {value: new THREE.Color(highlight)},
+										highlightBlend: {value: new THREE.Color(highlightBlend)},
+										blend: {value: new THREE.Color(blend)},
+										innerGlow: {value: new THREE.Color(innerGlow)},
+										displacementSize: {value: noiseDisplacement},
+										noise_size: {value: noiseSize},
+										time: {value: 0}
+									},
+									vertexShader: document.getElementById('vertexShader').textContent,
+									fragmentShader: document.getElementById('fragmentShader').textContent,
+									side: THREE.DoubleSide
+								  });
+				var sun = new THREE.Mesh( sunGeometry, sunMaterial );
+				sun.overdraw = true;
+				sun.castShadow = true;
+				sun.receiveShadow = false; // Default
+				scene.add( sun );
+			// <!------------------------------------------------------------------------------------------------->
 
 
-				// <!--------------------------------- CREATING GUI -------------------------------------------------->
-					var controller = new function() {
-					  this.positionX = cameraPosX;
-					  this.positionY = cameraPosY;
-					  this.positionZ = cameraPosZ;
-					  // Camera goes to planets position
-						  this.Sun = function () {
-						  	camera.position.x = cameraPosX;
-						    camera.position.y = cameraPosY;
-						    camera.position.z = cameraPosZ; 
-						  };
-						  this.Mercury = function () {
-						  	camera.position.x = mercury.position.x;
-						    camera.position.y = mercury.position.y;
-						    camera.position.z = mercury.position.z; 
-						  };
-						  this.Venus = function () {
-						  	camera.position.x = venus.position.x;
-						    camera.position.y = venus.position.y;
-						    camera.position.z = venus.position.z; 
-						  };
-						  this.Earth = function () {
-						  	camera.position.x = earth.position.x;
-						    camera.position.y = earth.position.y;
-						    camera.position.z = earth.position.z; 
-						  };
-						  this.Moon = function () {
-						  	camera.position.x = moon.position.x;
-						    camera.position.y = moon.position.y;
-						    camera.position.z = moon.position.z; 
-						  };
-						  this.Mars = function () {
-						  	camera.position.x = mars.position.x;
-						    camera.position.y = mars.position.y;
-						    camera.position.z = mars.position.z; 
-						  };
-						  this.Jupiter = function () {
-						  	camera.position.x = jupiter.position.x;
-						    camera.position.y = jupiter.position.y;
-						    camera.position.z = jupiter.position.z; 
-						  };
-						  this.Saturn = function () {
-						  	camera.position.x = saturn.position.x;
-						    camera.position.y = saturn.position.y;
-						    camera.position.z = saturn.position.z; 
-						  };
-						  this.Uranus = function () {
-						  	camera.position.x = uranus.position.x;
-						    camera.position.y = uranus.position.y;
-						    camera.position.z = uranus.position.z; 
-						  };
-						  this.Neptune = function () {
-						  	camera.position.x = neptune.position.x;
-						    camera.position.y = neptune.position.y;
-						    camera.position.z = neptune.position.z; 
-						  };
-					  this.orbitSpeed = 0;
-					  this.Highlight_Color = highlight;
-					  this.Blend_Color = blend;
-					  this.Inner_Glow = innerGlow;
-					  this.Glow_Size = 0; //glowSize
-					  this.Glow_Color = 0x000000; //glowColor
-					  this.Glow_Opacity = 1; //glowOpacity 
-					  this.Noise_Speed = noiseSpeed; 
-					  this.Noise_Size = noiseSize; 
-					  this.Noise_Displacement = noiseDisplacement; 
-					  this.Reset = function (){
-					  	//camera.position.x = cameraPosX;
-					    //camera.position.y = cameraPosY;
-					    //camera.position.z = cameraPosZ;
-					    //orbitspeed = 0; 
-					    highlight = 0xcc9900;
-					    sunMaterial.uniforms.highlight = {value: new THREE.Color(highlight)};
-						blend = 0xff0000;
-						sunMaterial.uniforms.blend = {value: new THREE.Color(blend)};
-						innerGlow = 0x000000;
-						sunMaterial.uniforms.innerGlow = {value: new THREE.Color(innerGlow)};
-						//glowsize
-						//glowcolor
-						//glowopacity
-						noiseSpeed = .000020;
-						noiseSize = -0.10;
-						sunMaterial.uniforms.noise_size = {value: noiseSize}
-						noiseDisplacement = -0.30;
-						sunMaterial.uniforms.displacementSize = {value: noiseDisplacement};
-					  };
+			// <!--------------------------------- ADDING PLANETS TO SOLAR SYSTEM -------------------------------->
 
-					}();
-
-					var gui = new dat.GUI({name: 'Control the solar system'});
+				// Function that generates planets with images as textures
+				function generatePlanet(radius, text, posX, posY, posZ)
+				{
+					var geometry = new THREE.SphereGeometry( radius, 32, 32 ),
+						texture = new THREE.TextureLoader().load( text ); // Load texture
 					
-					// View all planets up close
-					var cameraPos = gui.addFolder('Camera position');
-						cameraPos.add(controller, 'positionX', -100, 100).onChange( function() {
-						   camera.position.x = controller.positionX;
-						}).name('X');
-						cameraPos.add(controller, 'positionY', -100, 100).onChange( function() {
-						   camera.position.y = controller.positionY;
-						}).name('Y');
-						cameraPos.add(controller, 'positionZ', -100, 100).onChange( function() {
-						   camera.position.z = controller.positionZ;
-						}).name('Z');
-						cameraPos.add( controller, 'Sun');
-						cameraPos.add( controller, 'Mercury');
-						cameraPos.add( controller, 'Venus');
-						cameraPos.add( controller, 'Earth');
-						cameraPos.add( controller, 'Moon');
-						cameraPos.add( controller, 'Mars');
-						cameraPos.add( controller, 'Jupiter');
-						cameraPos.add( controller, 'Saturn');
-						cameraPos.add( controller, 'Uranus');
-						cameraPos.add( controller, 'Neptune');
+					//Wrap texture
+					texture.wrapS = texture.wrapT = THREE.MirroredRepeatWrapping;
+					texture.repeat.set( 1, 1 );
+					
+					//Mesh texture
+					var material = new THREE.MeshPhongMaterial( { map: texture } ),
+						planet = new THREE.Mesh( geometry, material );
+					
+					planet.castShadow = true; // Default is false
+	  				planet.receiveShadow = false; // Default
+					planet.position.x = posX;
+					planet.position.y = posY;
+					planet.position.z = posZ;
+					scene.add(planet);	
 
-					// Change orbits speed
-					gui.add( controller, 'orbitSpeed', 0, 1).onChange( function() {
-						//orbitSpeed = (controller.orbitSpeed);
-					}).name('Orbit Speed');
+					return planet; 
+				}
 
-					// Color folder
-					var colorFolder = gui.addFolder('Colors of the sun');
-						colorFolder.addColor(controller, 'Highlight_Color', highlight ).onChange( function() {
-							highlight = controller.Highlight_Color;
-							sunMaterial.uniforms.highlight = {value: new THREE.Color(highlight)};
-						}).name('Highlight Color');
-						colorFolder.addColor(controller, 'Blend_Color', blend ).onChange( function() {
-							blend = controller.Blend_Color;
-							sunMaterial.uniforms.blend = {value: new THREE.Color(blend)};
-						}).name('Blending Color');
-						colorFolder.addColor(controller, 'Inner_Glow', innerGlow ).onChange( function() {
-							innerGlow = controller.Inner_Glow;
-							sunMaterial.uniforms.innerGlow = {value: new THREE.Color(innerGlow)};
-						}).name('Inner Glow');
+				// Function that generates planets rings with images as textures
+				function generatePlanetRing(inR, outR, thetaSeg, phiSeg,thetaStart, thetaLength, text, posX, posY, posZ)
+				{
+					var ringgeometry = new THREE.RingGeometry(inR, outR, thetaSeg, phiSeg, thetaStart, thetaLength),
+						texture = new THREE.TextureLoader().load( text );
 
-					// Glow folder
-					var glowFolder = gui.addFolder('Sun glow');
-						glowFolder.add( controller, 'Glow_Size', 0, 1 ).onChange( function() {
-					  		//sunMaterial.opacity = (controller.boxOpacity);
-						} ).name('Size');
-						glowFolder.addColor(controller, 'Glow_Color', highlight ).onChange( function() {
-							//highlight = controller.Glow_color;
-							//sunMaterial.uniforms.highlight = {value: new THREE.Color(highlight)};
-						}).name('Color');
-						glowFolder.add( controller, 'Glow_Opacity', 0.1, 1 ).onChange( function() {
-					  		//sunMaterial.opacity = (controller.boxOpacity);
-						} ).name('Opacity');
+					const uniforms = THREE.UniformsUtils.merge([
+					    THREE.UniformsLib.ambient,
+					    THREE.UniformsLib.lights,
+					    THREE.UniformsLib.shadowmap,
+					    {
+					      ringTexture: { value: null },
+					      innerRadius: { value: 0 },
+					      outerRadius: { value: 0 },
+					      //lightPosition: { value: null }
+					    }
+					  ]);
+					  uniforms.ringTexture.value = texture;
+					  uniforms.innerRadius.value = inR;
+					  uniforms.outerRadius.value = outR;
+					  //uniforms.lightPosition.value = new THREE.Vector3(-5, 5, 1);
 
-					// Noise folder 
-					var noiseFolder = gui.addFolder('Sun noise');
-						noiseFolder.add( controller, 'Noise_Speed', 0.0, 0.0001).onChange( function() {
-							noiseSpeed = controller.Noise_Speed;
-						}).name('Speed');
-						noiseFolder.add( controller, 'Noise_Size', -1.0, -0.0).onChange( function() {
-							noiseSize = controller.Noise_Size;
-							sunMaterial.uniforms.noise_size = {value: noiseSize}
-						}).name('Size');
-						noiseFolder.add( controller, 'Noise_Displacement', -2.0, -0.0).onChange( function() {
-							noiseDisplacement = controller.Noise_Displacement;
-							sunMaterial.uniforms.displacementSize = {value: noiseDisplacement};
-						}).name('Displacement');
+					  const ringmaterial = new THREE.ShaderMaterial({
+					    uniforms,
+					    vertexShader: `
+							varying vec3 vPos;                                                     
+							//varying vec3 vWorldPosition;                                           
+							//varying vec3 vNormal;                                                 
 
-					// Reset button
-					gui.add( controller, 'Reset').name('Reset settings');
-				// <!------------------------------------------------------------------------------------------------->
+							${THREE.ShaderChunk["shadowmap_pars_vertex"]}                         
+
+							void main() {                                                         
+							  vPos = position;                                                     
+							  //vec4 worldPosition = (modelViewMatrix * vec4(position, 1.));         
+							  vec4 worldPosition = modelMatrix * vec4(position, 1.0);
+
+							  gl_Position = projectionMatrix * viewMatrix * vec4(worldPosition.xyz, 1.);       
+
+							  //vNormal = normalMatrix * normal;                                     
+							  //vWorldPosition = worldPosition.xyz;                                 
+
+							  ${THREE.ShaderChunk["shadowmap_vertex"]}
+							}   
+							    `,
+					    fragmentShader: `
+							uniform sampler2D ringTexture;
+							uniform float innerRadius;
+							uniform float outerRadius;
+							uniform vec3 lightPosition;
+
+							//varying vec3 vNormal;
+							varying vec3 vPos;
+							//varying vec3 vWorldPosition;
+
+							${THREE.ShaderChunk["common"]}
+							${THREE.ShaderChunk["packing"]}
+							${THREE.ShaderChunk["bsdfs"]}
+							${THREE.ShaderChunk["lights_pars_begin"]}
+							${THREE.ShaderChunk["shadowmap_pars_fragment"]}
+							${THREE.ShaderChunk["shadowmask_pars_fragment"]}
+
+							vec4 color() {
+							  vec2 uv = vec2(0);
+							  uv.x = (length(vPos) - innerRadius) / (outerRadius - innerRadius);
+							  if (uv.x < 0.0 || uv.x > 1.0) {
+							    discard;
+							  }                                                                           
+							  vec4 pixel = texture2D(ringTexture, uv);
+							  return pixel;
+							}
+
+							void main() {
+							  gl_FragColor = color() * vec4(vec3(getShadowMask()), 1.0);
+							}
+							    `,
+					    transparent: true,
+					    lights: true,
+					    side: THREE.DoubleSide,
+					  });
+						
+					var	ring = new THREE.Mesh( ringgeometry, ringmaterial );
+					ring.castShadow = true;
+	  				ring.receiveShadow = false;
+					ring.position.x = posX;
+					ring.position.y = posY;
+					ring.position.z = posZ;
+					ring.rotation.x = 30;
+					scene.add(ring);
+
+					return ring; 
+				}
+
+				// Adding planets of the solar system (with image textures) to scene
+				var mercury = generatePlanet(0.8, "img/textures/mercury.jpg" , 40.6, 0, 0),
+					venus = generatePlanet(1.2, "img/textures/venus.jpg", 43.8, 0, 0),
+					moon = generatePlanet(0.6, "img/textures/moon.jpg", 47.4, 2, -2),
+					mars = generatePlanet(0.8, "img/textures/mars.jpg", 50.6, 0, 0),
+					jupiter = generatePlanet(2, "img/textures/jupiter.jpg", 54.4, 0, 0),
+					saturn = generatePlanet(1.9, "img/textures/saturn.jpg", 60.9, 0, 0),
+						saturnRing = generatePlanetRing(2.0, 3.6, 30, 30, 0, 6.3, "img/textures/saturn_ring.png", 60.9, 0, 0),
+					uranus = generatePlanet(1.8, "img/textures/uranus.jpg", 68.4, 0, 0),
+						uranusRing = generatePlanetRing(2.2, 3.2, 30, 30, 0, 6.3, "img/textures/uranus_ring.jpg", 68.4, 0, 0),
+					neptune = generatePlanet(1.8, "img/textures/neptune.jpg", 74.6, 0, 0);
+				// Earth + Clouds
+				var geometryEarth = new THREE.SphereGeometry(1.4, 32, 32),
+					geometryClouds = new THREE.SphereGeometry(1.41, 32, 32),
+					materialEarth = new THREE.MeshPhongMaterial({
+						map 		: new THREE.TextureLoader().load('img/textures/earth.jpg'),
+						bumpMap 	: new THREE.TextureLoader().load('img/textures/earthbump.jpg'),
+						bumpScale 	: 0.05,
+						specularMap : new THREE.TextureLoader().load('img/textures/earthspec.jpg'),
+						specular 	: new THREE.Color('grey'),
+					}),
+					materialClouds  = new THREE.MeshPhongMaterial({
+						map     	: new THREE.TextureLoader().load('img/textures/earthcloud.jpg'),
+						side        : THREE.DoubleSide,
+						opacity     : 0.8,
+						transparent : true,
+						depthWrite  : false
+					}),
+					earth = new THREE.Mesh(geometryEarth, materialEarth),
+					clouds = new THREE.Mesh(geometryClouds, materialClouds);
+					earth.castShadow = true;
+					earth.receiveShadow = false;
+					clouds.castShadow = true;
+					clouds.receiveShadow = false;
+					earth.position.x = 47.4;
+					scene.add(earth);
+					earth.add(clouds);
+
+				// CREATING THE STARRY BACKGROUND
+				// Create particles
+				var particleCount = 2000,
+				    particles = new THREE.Geometry(),
+				    ptexture = new THREE.TextureLoader().load("img/textures/star.png"),
+				    pMaterial = new THREE.PointsMaterial({
+				      color: 0xFFFFFF,
+				      map: ptexture,
+				      transparent: true, 
+				      blending: THREE.AdditiveBlending,
+				      depthTest: true, 
+				      size: 2
+				});
+				// Create the individual particles
+				for (var p = 0; p < particleCount; p++) {
+				  // Create a particle with random x position (-120, 120)
+				  var pX = Math.random() * 240 - 120,
+				      pY = Math.random() * 240 - 120,
+				      pZ = Math.random() * 240 - 120,
+				      particle = new THREE.Vector3(pX, pY, pZ);
+
+				  particles.vertices.push(particle);
+				}
+				// Create the particle system
+				var particleSystem = new THREE.Points(particles, pMaterial);
+				particleSystem.sortParticles = true;
+				scene.add(particleSystem);
+			// <!------------------------------------------------------------------------------------------------->
 
 
-				// <!--------------------------------- RENDERING SETTINGS -------------------------------------------->
-					// Window resize
-					function onWindowResize() {
-						renderer.setSize( width, height );
-						camera.aspect = ratio;
-						camera.updateProjectionMatrix();
-					}
+			// <!--------------------------------- CREATING GUI -------------------------------------------------->
+				
+				var controller = new function() {
+				  this.positionX = cameraPosX;
+				  this.positionY = cameraPosY;
+				  this.positionZ = cameraPosZ;
+				  // Camera goes to planets position
+					  this.Sun = function () {
+					  	camera.position.x = cameraPosX;
+					    camera.position.y = cameraPosY;
+					    camera.position.z = cameraPosZ; 
+					  };
+					  this.Mercury = function () {
+					  	camera.position.x = mercury.position.x;
+					    camera.position.y = mercury.position.y;
+					    camera.position.z = mercury.position.z; 
+					  };
+					  this.Venus = function () {
+					  	camera.position.x = venus.position.x;
+					    camera.position.y = venus.position.y;
+					    camera.position.z = venus.position.z; 
+					  };
+					  this.Earth = function () {
+					  	camera.position.x = earth.position.x;
+					    camera.position.y = earth.position.y;
+					    camera.position.z = earth.position.z; 
+					  };
+					  this.Moon = function () {
+					  	camera.position.x = moon.position.x;
+					    camera.position.y = moon.position.y;
+					    camera.position.z = moon.position.z; 
+					  };
+					  this.Mars = function () {
+					  	camera.position.x = mars.position.x;
+					    camera.position.y = mars.position.y;
+					    camera.position.z = mars.position.z; 
+					  };
+					  this.Jupiter = function () {
+					  	camera.position.x = jupiter.position.x;
+					    camera.position.y = jupiter.position.y;
+					    camera.position.z = jupiter.position.z; 
+					  };
+					  this.Saturn = function () {
+					  	camera.position.x = saturn.position.x;
+					    camera.position.y = saturn.position.y;
+					    camera.position.z = saturn.position.z; 
+					  };
+					  this.Uranus = function () {
+					  	camera.position.x = uranus.position.x;
+					    camera.position.y = uranus.position.y;
+					    camera.position.z = uranus.position.z; 
+					  };
+					  this.Neptune = function () {
+					  	camera.position.x = neptune.position.x;
+					    camera.position.y = neptune.position.y;
+					    camera.position.z = neptune.position.z; 
+					  };
+				  this.orbitSpeed = 0;
+				  this.Highlight_Color = highlight;
+				  this.Blend_Color = blend;
+				  this.Inner_Glow = innerGlow;
+				  this.Glow_Size = 0; //glowSize
+				  this.Glow_Color = 0x000000; //glowColor
+				  this.Glow_Opacity = 1; //glowOpacity 
+				  this.Noise_Speed = noiseSpeed; 
+				  this.Noise_Size = noiseSize; 
+				  this.Noise_Displacement = noiseDisplacement; 
+				  this.Reset = function (){
+				  	//camera.position.x = cameraPosX;
+				    //camera.position.y = cameraPosY;
+				    //camera.position.z = cameraPosZ;
+				    //orbitspeed = 0; 
+				    highlight = 0xcc9900;
+				    sunMaterial.uniforms.highlight = {value: new THREE.Color(highlight)};
+					blend = 0xff0000;
+					sunMaterial.uniforms.blend = {value: new THREE.Color(blend)};
+					innerGlow = 0x000000;
+					sunMaterial.uniforms.innerGlow = {value: new THREE.Color(innerGlow)};
+					//glowsize
+					//glowcolor
+					//glowopacity
+					noiseSpeed = .000020;
+					noiseSize = -0.10;
+					sunMaterial.uniforms.noise_size = {value: noiseSize}
+					noiseDisplacement = -0.30;
+					sunMaterial.uniforms.displacementSize = {value: noiseDisplacement};
+				  };
+				};
 
-					// Rendering
-					function render() {
+				var gui = new dat.GUI({name: 'Control the solar system'});
+				
+				// View all planets up close
+				var cameraPos = gui.addFolder('Camera position');
+					cameraPos.add(controller, 'positionX', -100, 100).onChange( function() {
+					   camera.position.x = controller.positionX;
+					}).name('X');
+					cameraPos.add(controller, 'positionY', -100, 100).onChange( function() {
+					   camera.position.y = controller.positionY;
+					}).name('Y');
+					cameraPos.add(controller, 'positionZ', -100, 100).onChange( function() {
+					   camera.position.z = controller.positionZ;
+					}).name('Z');
+					cameraPos.add( controller, 'Sun');
+					cameraPos.add( controller, 'Mercury');
+					cameraPos.add( controller, 'Venus');
+					cameraPos.add( controller, 'Earth');
+					cameraPos.add( controller, 'Moon');
+					cameraPos.add( controller, 'Mars');
+					cameraPos.add( controller, 'Jupiter');
+					cameraPos.add( controller, 'Saturn');
+					cameraPos.add( controller, 'Uranus');
+					cameraPos.add( controller, 'Neptune');
 
-						// Rotations
-						particleSystem.rotation.y -= 0.001;
-						sun.rotation.y -= 0.001;
-						earth.rotation.y  -= 0.0005;
-						clouds.rotation.y  -= 0.001;
-						mercury.rotation.y  -= 0.001;				
-						venus.rotation.y  -= 0.001;
-						moon.rotation.y  -= 0.001;
-						mars.rotation.y  -= 0.001;
-						jupiter.rotation.y  -= 0.001;
-						saturn.rotation.y  -= 0.001;
-							saturnRing.rotation.z += 0.001;
-						uranus.rotation.y  -= 0.001;
-							uranusRing.rotation.z += 0.001;
-						neptune.rotation.y  -= 0.001;
+				// Change orbits speed
+				gui.add( controller, 'orbitSpeed', 0, 1).onChange( function() {
+					//orbitSpeed = (controller.orbitSpeed);
+				}).name('Orbit Speed');
 
-						// Adding noise movement
-						sunMaterial.uniforms[ 'time' ].value = noiseSpeed * ( Date.now() - start );
+				// Color folder
+				var colorFolder = gui.addFolder('Colors of the sun');
+					colorFolder.addColor(controller, 'Highlight_Color', highlight ).onChange( function() {
+						highlight = controller.Highlight_Color;
+						sunMaterial.uniforms.highlight = {value: new THREE.Color(highlight)};
+					}).name('Highlight Color');
+					colorFolder.addColor(controller, 'Blend_Color', blend ).onChange( function() {
+						blend = controller.Blend_Color;
+						sunMaterial.uniforms.blend = {value: new THREE.Color(blend)};
+					}).name('Blending Color');
+					colorFolder.addColor(controller, 'Inner_Glow', innerGlow ).onChange( function() {
+						innerGlow = controller.Inner_Glow;
+						sunMaterial.uniforms.innerGlow = {value: new THREE.Color(innerGlow)};
+					}).name('Inner Glow');
 
-						//controls.update();
-						requestAnimationFrame( render );
-						renderer.render( scene, camera );
+				// Glow folder
+				var glowFolder = gui.addFolder('Sun glow');
+					glowFolder.add( controller, 'Glow_Size', 0, 1 ).onChange( function() {
+				  		//sunMaterial.opacity = (controller.boxOpacity);
+					} ).name('Size');
+					glowFolder.addColor(controller, 'Glow_Color', highlight ).onChange( function() {
+						//highlight = controller.Glow_color;
+						//sunMaterial.uniforms.highlight = {value: new THREE.Color(highlight)};
+					}).name('Color');
+					glowFolder.add( controller, 'Glow_Opacity', 0.1, 1 ).onChange( function() {
+				  		//sunMaterial.opacity = (controller.boxOpacity);
+					} ).name('Opacity');
 
-					}
+				// Noise folder 
+				var noiseFolder = gui.addFolder('Sun noise');
+					noiseFolder.add( controller, 'Noise_Speed', 0.0, 0.001).onChange( function() {
+						noiseSpeed = controller.Noise_Speed;
+					}).name('Speed');
+					noiseFolder.add( controller, 'Noise_Size', -1.0, -0.0).onChange( function() {
+						noiseSize = controller.Noise_Size;
+						sunMaterial.uniforms.noise_size = {value: noiseSize}
+					}).name('Size');
+					noiseFolder.add( controller, 'Noise_Displacement', -2.0, -0.0).onChange( function() {
+						noiseDisplacement = controller.Noise_Displacement;
+						sunMaterial.uniforms.displacementSize = {value: noiseDisplacement};
+					}).name('Displacement');
 
-					window.addEventListener( 'resize', onWindowResize, false );
+				// Reset button
+				gui.add( controller, 'Reset').name('Reset settings');
+			// <!------------------------------------------------------------------------------------------------->
 
-					render();
-				// <!------------------------------------------------------------------------------------------------->
+
+			// <!--------------------------------- RENDERING SETTINGS -------------------------------------------->
+				
+				function onWindowResize() {
+					renderer.setSize( width, height );
+					camera.aspect = ratio;
+					camera.updateProjectionMatrix();
+				}
+
+				function render() {
+
+					// Rotations
+					particleSystem.rotation.y -= 0.001;
+					sun.rotation.y -= 0.001;
+					earth.rotation.y  -= 0.0005;
+					clouds.rotation.y  -= 0.001;
+					mercury.rotation.y  -= 0.001;				
+					venus.rotation.y  -= 0.001;
+					moon.rotation.y  -= 0.001;
+					mars.rotation.y  -= 0.001;
+					jupiter.rotation.y  -= 0.001;
+					saturn.rotation.y  -= 0.001;
+						saturnRing.rotation.z += 0.001;
+					uranus.rotation.y  -= 0.001;
+						uranusRing.rotation.z += 0.001;
+					neptune.rotation.y  -= 0.001;
+
+					// Adding noise movement
+					sunMaterial.uniforms[ 'time' ].value = noiseSpeed * ( Date.now() - start );
+
+					//controls.update();
+					requestAnimationFrame( render );
+					renderer.render( scene, camera );
+				}
+
+				window.addEventListener( 'resize', onWindowResize, false );
+
+				render();
+			// <!------------------------------------------------------------------------------------------------->
 			}
 		</script>
 	</body>
