@@ -23,9 +23,9 @@
   			<h3>Created by Aniisa Bihi</h3>
 		</div>
 
-		<!------------- ADDING NECCESARY SCRIPTS ------------->
+		<!------------- ADDING NECCESARY SCRIPTS ------------
 		<script src="js/three.min.js"></script>
-		<script src="js/OrbitControls.js"></script>
+		<script src="js/OrbitControls.js"></script> -->
 		<script src="js/dat.gui.min.js"></script>
 
 
@@ -263,7 +263,11 @@
 		</script>
 
 		<!------------------ MAIN SCRIPT --------------------->
-		<script id="main">
+		<script type="module" id="main">
+
+			import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.112.0/build/three.module.js";
+		    import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.112.0/examples/jsm/controls/OrbitControls.js";
+		    //import {color, controllers, dom, gui, GUI} from "js/dat.gui.module.js";
 
 			var container, renderer, scene,
 				camera, mesh, fov = 45, 
@@ -280,80 +284,79 @@
 			function init() {
 
 				// <!--------------------------------- SETTING UP SCENE ---------------------------------------------->
-				container = document.getElementById( 'container' );
+					container = document.getElementById( 'container' );
 
-				scene = new THREE.Scene();
-				renderer = new THREE.WebGLRenderer( {antialias:true});
-				renderer.setPixelRatio( window.devicePixelRatio );
-				renderer.setSize( width, height);
-				renderer.autoClear = false;
-				container.appendChild( renderer.domElement );
+					scene = new THREE.Scene();
+					renderer = new THREE.WebGLRenderer( {antialias:true});
+					renderer.setPixelRatio( window.devicePixelRatio );
+					renderer.setSize( width, height);
+					renderer.autoClear = false;
+					container.appendChild( renderer.domElement );
 
-				// Setting up camera
-				camera = new THREE.PerspectiveCamera( fov, ratio, 1, 10000 );
-				camera.position.x = cameraPosX;
-				camera.position.y = cameraPosY;
-				camera.position.z = cameraPosZ;
-				camera.target = new THREE.Vector3( 0, 0, 0 );
-				scene.add( camera );
-				// Give user control of camera
-				var controls = new THREE.OrbitControls( camera, renderer.domElement );
+					// Setting up camera
+					camera = new THREE.PerspectiveCamera( fov, ratio, 1, 10000 );
+					camera.position.x = cameraPosX;
+					camera.position.y = cameraPosY;
+					camera.position.z = cameraPosZ;
+					camera.target = new THREE.Vector3( 0, 0, 0 );
+					scene.add( camera );
+					// Give user control of camera
+					var controls = new OrbitControls( camera, renderer.domElement );
 
 				// <!------------------------------------------------------------------------------------------------->
 
 
 				// <!--------------------------------- MAIN GUI EDITABLE PLANET -------------------------------------->
 
-				// Sunlight 
-				var lightColor = 0xffffff,
-					lightIntensity = 1.0;
-					lightDistance = 0.0; 
-					lightDecay = 2.0; 
-					sunlight = new THREE.PointLight( lightColor, lightIntensity, lightDistance, lightDecay);
-				sunlight.power = lightIntensity * 4 * Math.PI; 
-				sunlight.castShadow = true;
-				sunlight.position.set( 0, 0, 0 );
-				scene.add( sunlight );
+					// Sunlight 
+					var lightColor = 0xffffff,
+						lightIntensity = 1.0,
+						lightDistance = 0.0, 
+						lightDecay = 2.0, 
+						sunlight = new THREE.PointLight( lightColor, lightIntensity, lightDistance, lightDecay);
+					sunlight.power = lightIntensity * 4 * Math.PI; 
+					sunlight.castShadow = true;
+					sunlight.position.set( 0, 0, 0 );
+					scene.add( sunlight );
 
-				// The colors of the sun
-				var highlight = 0xcc9900, 
-					highlightBlend = 0xe65c00,
-					blend = 0xff0000,
-					innerGlow = 0x000000;
+					// The colors of the sun
+					var highlight = 0xcc9900, 
+						highlightBlend = 0xe65c00,
+						blend = 0xff0000,
+						innerGlow = 0x000000;
 
-				// The parameters of the noise
-				var noiseSpeed = .000020,
-					noiseSize = -0.10,
-					noiseDisplacement = -0.30;
+					// The parameters of the noise
+					var noiseSpeed = .000020,
+						noiseSize = -0.10,
+						noiseDisplacement = -0.30;
 
-				// Adding the sun to the scene
-				var sunGeometry = new THREE.IcosahedronGeometry( 20, 6 ); //new THREE.SphereGeometry( 8, 32, 32);
-				var sunMaterial = new THREE.ShaderMaterial({
-									uniforms: {
-										highlight: {value: new THREE.Color(highlight)},
-										highlightBlend: {value: new THREE.Color(highlightBlend)},
-										blend: {value: new THREE.Color(blend)},
-										innerGlow: {value: new THREE.Color(innerGlow)},
-										displacementSize: {value: noiseDisplacement},
-										noise_size: {value: noiseSize},
-										time: {value: 0}
-									},
-									vertexShader: document.getElementById('vertexShader').textContent,
-									fragmentShader: document.getElementById('fragmentShader').textContent,
-									side: THREE.DoubleSide
-								  });
-				var sun = new THREE.Mesh( sunGeometry, sunMaterial );
-				sun.overdraw = true;
-				sun.castShadow = true;
-				sun.receiveShadow = false; //default
-				scene.add( sun );
+					// Adding the sun to the scene
+					var sunGeometry = new THREE.IcosahedronGeometry( 20, 6 ); //new THREE.SphereGeometry( 8, 32, 32);
+					var sunMaterial = new THREE.ShaderMaterial({
+										uniforms: {
+											highlight: {value: new THREE.Color(highlight)},
+											highlightBlend: {value: new THREE.Color(highlightBlend)},
+											blend: {value: new THREE.Color(blend)},
+											innerGlow: {value: new THREE.Color(innerGlow)},
+											displacementSize: {value: noiseDisplacement},
+											noise_size: {value: noiseSize},
+											time: {value: 0}
+										},
+										vertexShader: document.getElementById('vertexShader').textContent,
+										fragmentShader: document.getElementById('fragmentShader').textContent,
+										side: THREE.DoubleSide
+									  });
+					var sun = new THREE.Mesh( sunGeometry, sunMaterial );
+					sun.overdraw = true;
+					sun.castShadow = true;
+					sun.receiveShadow = false; //default
+					scene.add( sun );
 				// <!------------------------------------------------------------------------------------------------->
 
 
 				// <!--------------------------------- ADDING PLANETS TO SOLAR SYSTEM -------------------------------->
 
-
-				//Function that generates planets with images as textures
+					//Function that generates planets with images as textures
 					function generatePlanet(radius, text, posX, posY, posZ){
 						//Geometry
 						var geometry = new THREE.SphereGeometry( radius, 32, 32 ),
@@ -541,209 +544,209 @@
 
 
 				// <!--------------------------------- CREATING GUI -------------------------------------------------->
-				var controller = new function() {
-				  this.positionX = cameraPosX;
-				  this.positionY = cameraPosY;
-				  this.positionZ = cameraPosZ;
-				  // Camera goes to planets position
-					  this.Sun = function () {
-					  	camera.position.x = cameraPosX;
-					    camera.position.y = cameraPosY;
-					    camera.position.z = cameraPosZ; 
-					  };
-					  this.Mercury = function () {
-					  	camera.position.x = mercury.position.x;
-					    camera.position.y = mercury.position.y;
-					    camera.position.z = mercury.position.z; 
-					  };
-					  this.Venus = function () {
-					  	camera.position.x = venus.position.x;
-					    camera.position.y = venus.position.y;
-					    camera.position.z = venus.position.z; 
-					  };
-					  this.Earth = function () {
-					  	camera.position.x = earth.position.x;
-					    camera.position.y = earth.position.y;
-					    camera.position.z = earth.position.z; 
-					  };
-					  this.Moon = function () {
-					  	camera.position.x = moon.position.x;
-					    camera.position.y = moon.position.y;
-					    camera.position.z = moon.position.z; 
-					  };
-					  this.Mars = function () {
-					  	camera.position.x = mars.position.x;
-					    camera.position.y = mars.position.y;
-					    camera.position.z = mars.position.z; 
-					  };
-					  this.Jupiter = function () {
-					  	camera.position.x = jupiter.position.x;
-					    camera.position.y = jupiter.position.y;
-					    camera.position.z = jupiter.position.z; 
-					  };
-					  this.Saturn = function () {
-					  	camera.position.x = saturn.position.x;
-					    camera.position.y = saturn.position.y;
-					    camera.position.z = saturn.position.z; 
-					  };
-					  this.Uranus = function () {
-					  	camera.position.x = uranus.position.x;
-					    camera.position.y = uranus.position.y;
-					    camera.position.z = uranus.position.z; 
-					  };
-					  this.Neptune = function () {
-					  	camera.position.x = neptune.position.x;
-					    camera.position.y = neptune.position.y;
-					    camera.position.z = neptune.position.z; 
-					  };
-				  this.orbitSpeed = 0;
-				  this.Highlight_Color = highlight;
-				  this.Blend_Color = blend;
-				  this.Inner_Glow = innerGlow;
-				  this.Glow_Size = 0; //glowSize
-				  this.Glow_Color = 0x000000; //glowColor
-				  this.Glow_Opacity = 1; //glowOpacity 
-				  this.Noise_Speed = noiseSpeed; 
-				  this.Noise_Size = noiseSize; 
-				  this.Noise_Displacement = noiseDisplacement; 
-				  this.Reset = function (){
-				  	//camera.position.x = cameraPosX;
-				    //camera.position.y = cameraPosY;
-				    //camera.position.z = cameraPosZ;
-				    orbitspeed = 0; 
-				    highlight = 0xcc9900;
-				    sunMaterial.uniforms.highlight = {value: new THREE.Color(highlight)};
-					blend = 0xff0000;
-					sunMaterial.uniforms.blend = {value: new THREE.Color(blend)};
-					innerGlow = 0x000000;
-					sunMaterial.uniforms.innerGlow = {value: new THREE.Color(innerGlow)};
-					//glowsize
-					//glowcolor
-					//glowopacity
-					noiseSpeed = .000020;
-					noiseSize = -0.10;
-					sunMaterial.uniforms.noise_size = {value: noiseSize}
-					noiseDisplacement = -0.30;
-					sunMaterial.uniforms.displacementSize = {value: noiseDisplacement};
-				  };
-
-				}();
-
-				var gui = new dat.GUI({name: 'Control the solar system'});
-				
-				// View all planets up close
-				var cameraPos = gui.addFolder('Camera position');
-					cameraPos.add(controller, 'positionX', -100, 100).onChange( function() {
-					   camera.position.x = controller.positionX;
-					}).name('X');
-					cameraPos.add(controller, 'positionY', -100, 100).onChange( function() {
-					   camera.position.y = controller.positionY;
-					}).name('Y');
-					cameraPos.add(controller, 'positionZ', -100, 100).onChange( function() {
-					   camera.position.z = controller.positionZ;
-					}).name('Z');
-					cameraPos.add( controller, 'Sun');
-					cameraPos.add( controller, 'Mercury');
-					cameraPos.add( controller, 'Venus');
-					cameraPos.add( controller, 'Earth');
-					cameraPos.add( controller, 'Moon');
-					cameraPos.add( controller, 'Mars');
-					cameraPos.add( controller, 'Jupiter');
-					cameraPos.add( controller, 'Saturn');
-					cameraPos.add( controller, 'Uranus');
-					cameraPos.add( controller, 'Neptune');
-
-				// Change orbits speed
-				gui.add( controller, 'orbitSpeed', 0, 1).onChange( function() {
-					orbitSpeed = (controller.orbitSpeed);
-				}).name('Orbit Speed');
-
-				// Color folder
-				var colorFolder = gui.addFolder('Colors of the sun');
-					colorFolder.addColor(controller, 'Highlight_Color', highlight ).onChange( function() {
-						highlight = controller.Highlight_Color;
-						sunMaterial.uniforms.highlight = {value: new THREE.Color(highlight)};
-					}).name('Highlight Color');
-					colorFolder.addColor(controller, 'Blend_Color', blend ).onChange( function() {
-						blend = controller.Blend_Color;
+					var controller = new function() {
+					  this.positionX = cameraPosX;
+					  this.positionY = cameraPosY;
+					  this.positionZ = cameraPosZ;
+					  // Camera goes to planets position
+						  this.Sun = function () {
+						  	camera.position.x = cameraPosX;
+						    camera.position.y = cameraPosY;
+						    camera.position.z = cameraPosZ; 
+						  };
+						  this.Mercury = function () {
+						  	camera.position.x = mercury.position.x;
+						    camera.position.y = mercury.position.y;
+						    camera.position.z = mercury.position.z; 
+						  };
+						  this.Venus = function () {
+						  	camera.position.x = venus.position.x;
+						    camera.position.y = venus.position.y;
+						    camera.position.z = venus.position.z; 
+						  };
+						  this.Earth = function () {
+						  	camera.position.x = earth.position.x;
+						    camera.position.y = earth.position.y;
+						    camera.position.z = earth.position.z; 
+						  };
+						  this.Moon = function () {
+						  	camera.position.x = moon.position.x;
+						    camera.position.y = moon.position.y;
+						    camera.position.z = moon.position.z; 
+						  };
+						  this.Mars = function () {
+						  	camera.position.x = mars.position.x;
+						    camera.position.y = mars.position.y;
+						    camera.position.z = mars.position.z; 
+						  };
+						  this.Jupiter = function () {
+						  	camera.position.x = jupiter.position.x;
+						    camera.position.y = jupiter.position.y;
+						    camera.position.z = jupiter.position.z; 
+						  };
+						  this.Saturn = function () {
+						  	camera.position.x = saturn.position.x;
+						    camera.position.y = saturn.position.y;
+						    camera.position.z = saturn.position.z; 
+						  };
+						  this.Uranus = function () {
+						  	camera.position.x = uranus.position.x;
+						    camera.position.y = uranus.position.y;
+						    camera.position.z = uranus.position.z; 
+						  };
+						  this.Neptune = function () {
+						  	camera.position.x = neptune.position.x;
+						    camera.position.y = neptune.position.y;
+						    camera.position.z = neptune.position.z; 
+						  };
+					  this.orbitSpeed = 0;
+					  this.Highlight_Color = highlight;
+					  this.Blend_Color = blend;
+					  this.Inner_Glow = innerGlow;
+					  this.Glow_Size = 0; //glowSize
+					  this.Glow_Color = 0x000000; //glowColor
+					  this.Glow_Opacity = 1; //glowOpacity 
+					  this.Noise_Speed = noiseSpeed; 
+					  this.Noise_Size = noiseSize; 
+					  this.Noise_Displacement = noiseDisplacement; 
+					  this.Reset = function (){
+					  	//camera.position.x = cameraPosX;
+					    //camera.position.y = cameraPosY;
+					    //camera.position.z = cameraPosZ;
+					    //orbitspeed = 0; 
+					    highlight = 0xcc9900;
+					    sunMaterial.uniforms.highlight = {value: new THREE.Color(highlight)};
+						blend = 0xff0000;
 						sunMaterial.uniforms.blend = {value: new THREE.Color(blend)};
-					}).name('Blending Color');
-					colorFolder.addColor(controller, 'Inner_Glow', innerGlow ).onChange( function() {
-						innerGlow = controller.Inner_Glow;
+						innerGlow = 0x000000;
 						sunMaterial.uniforms.innerGlow = {value: new THREE.Color(innerGlow)};
-					}).name('Inner Glow');
-
-				// Glow folder
-				var glowFolder = gui.addFolder('Sun glow');
-					glowFolder.add( controller, 'Glow_Size', 0, 1 ).onChange( function() {
-				  		//sunMaterial.opacity = (controller.boxOpacity);
-					} ).name('Size');
-					glowFolder.addColor(controller, 'Glow_Color', highlight ).onChange( function() {
-						//highlight = controller.Glow_color;
-						//sunMaterial.uniforms.highlight = {value: new THREE.Color(highlight)};
-					}).name('Color');
-					glowFolder.add( controller, 'Glow_Opacity', 0.1, 1 ).onChange( function() {
-				  		//sunMaterial.opacity = (controller.boxOpacity);
-					} ).name('Opacity');
-
-				// Noise folder 
-				var noiseFolder = gui.addFolder('Sun noise');
-					noiseFolder.add( controller, 'Noise_Speed', 0.0, 0.0001).onChange( function() {
-						noiseSpeed = controller.Noise_Speed;
-					}).name('Speed');
-					noiseFolder.add( controller, 'Noise_Size', -1.0, -0.0).onChange( function() {
-						noiseSize = controller.Noise_Size;
+						//glowsize
+						//glowcolor
+						//glowopacity
+						noiseSpeed = .000020;
+						noiseSize = -0.10;
 						sunMaterial.uniforms.noise_size = {value: noiseSize}
-					}).name('Size');
-					noiseFolder.add( controller, 'Noise_Displacement', -2.0, -0.0).onChange( function() {
-						noiseDisplacement = controller.Noise_Displacement;
+						noiseDisplacement = -0.30;
 						sunMaterial.uniforms.displacementSize = {value: noiseDisplacement};
-					}).name('Displacement');
+					  };
 
-				// Reset button
-				gui.add( controller, 'Reset').name('Reset settings');
+					}();
+
+					var gui = new dat.GUI({name: 'Control the solar system'});
+					
+					// View all planets up close
+					var cameraPos = gui.addFolder('Camera position');
+						cameraPos.add(controller, 'positionX', -100, 100).onChange( function() {
+						   camera.position.x = controller.positionX;
+						}).name('X');
+						cameraPos.add(controller, 'positionY', -100, 100).onChange( function() {
+						   camera.position.y = controller.positionY;
+						}).name('Y');
+						cameraPos.add(controller, 'positionZ', -100, 100).onChange( function() {
+						   camera.position.z = controller.positionZ;
+						}).name('Z');
+						cameraPos.add( controller, 'Sun');
+						cameraPos.add( controller, 'Mercury');
+						cameraPos.add( controller, 'Venus');
+						cameraPos.add( controller, 'Earth');
+						cameraPos.add( controller, 'Moon');
+						cameraPos.add( controller, 'Mars');
+						cameraPos.add( controller, 'Jupiter');
+						cameraPos.add( controller, 'Saturn');
+						cameraPos.add( controller, 'Uranus');
+						cameraPos.add( controller, 'Neptune');
+
+					// Change orbits speed
+					gui.add( controller, 'orbitSpeed', 0, 1).onChange( function() {
+						//orbitSpeed = (controller.orbitSpeed);
+					}).name('Orbit Speed');
+
+					// Color folder
+					var colorFolder = gui.addFolder('Colors of the sun');
+						colorFolder.addColor(controller, 'Highlight_Color', highlight ).onChange( function() {
+							highlight = controller.Highlight_Color;
+							sunMaterial.uniforms.highlight = {value: new THREE.Color(highlight)};
+						}).name('Highlight Color');
+						colorFolder.addColor(controller, 'Blend_Color', blend ).onChange( function() {
+							blend = controller.Blend_Color;
+							sunMaterial.uniforms.blend = {value: new THREE.Color(blend)};
+						}).name('Blending Color');
+						colorFolder.addColor(controller, 'Inner_Glow', innerGlow ).onChange( function() {
+							innerGlow = controller.Inner_Glow;
+							sunMaterial.uniforms.innerGlow = {value: new THREE.Color(innerGlow)};
+						}).name('Inner Glow');
+
+					// Glow folder
+					var glowFolder = gui.addFolder('Sun glow');
+						glowFolder.add( controller, 'Glow_Size', 0, 1 ).onChange( function() {
+					  		//sunMaterial.opacity = (controller.boxOpacity);
+						} ).name('Size');
+						glowFolder.addColor(controller, 'Glow_Color', highlight ).onChange( function() {
+							//highlight = controller.Glow_color;
+							//sunMaterial.uniforms.highlight = {value: new THREE.Color(highlight)};
+						}).name('Color');
+						glowFolder.add( controller, 'Glow_Opacity', 0.1, 1 ).onChange( function() {
+					  		//sunMaterial.opacity = (controller.boxOpacity);
+						} ).name('Opacity');
+
+					// Noise folder 
+					var noiseFolder = gui.addFolder('Sun noise');
+						noiseFolder.add( controller, 'Noise_Speed', 0.0, 0.0001).onChange( function() {
+							noiseSpeed = controller.Noise_Speed;
+						}).name('Speed');
+						noiseFolder.add( controller, 'Noise_Size', -1.0, -0.0).onChange( function() {
+							noiseSize = controller.Noise_Size;
+							sunMaterial.uniforms.noise_size = {value: noiseSize}
+						}).name('Size');
+						noiseFolder.add( controller, 'Noise_Displacement', -2.0, -0.0).onChange( function() {
+							noiseDisplacement = controller.Noise_Displacement;
+							sunMaterial.uniforms.displacementSize = {value: noiseDisplacement};
+						}).name('Displacement');
+
+					// Reset button
+					gui.add( controller, 'Reset').name('Reset settings');
 				// <!------------------------------------------------------------------------------------------------->
 
 
 				// <!--------------------------------- RENDERING SETTINGS -------------------------------------------->
-				// Window resize
-				function onWindowResize() {
-					renderer.setSize( width, height );
-					camera.aspect = ratio;
-					camera.updateProjectionMatrix();
-				}
+					// Window resize
+					function onWindowResize() {
+						renderer.setSize( width, height );
+						camera.aspect = ratio;
+						camera.updateProjectionMatrix();
+					}
 
-				// Rendering
-				function render() {
+					// Rendering
+					function render() {
 
-					// Rotations
-					particleSystem.rotation.y -= 0.001;
-					sun.rotation.y -= 0.001;
-					earth.rotation.y  -= 0.0005;
-					clouds.rotation.y  -= 0.001;
-					mercury.rotation.y  -= 0.001;				
-					venus.rotation.y  -= 0.001;
-					moon.rotation.y  -= 0.001;
-					mars.rotation.y  -= 0.001;
-					jupiter.rotation.y  -= 0.001;
-					saturn.rotation.y  -= 0.001;
-						saturnRing.rotation.z += 0.001;
-					uranus.rotation.y  -= 0.001;
-						uranusRing.rotation.z += 0.001;
-					neptune.rotation.y  -= 0.001;
+						// Rotations
+						particleSystem.rotation.y -= 0.001;
+						sun.rotation.y -= 0.001;
+						earth.rotation.y  -= 0.0005;
+						clouds.rotation.y  -= 0.001;
+						mercury.rotation.y  -= 0.001;				
+						venus.rotation.y  -= 0.001;
+						moon.rotation.y  -= 0.001;
+						mars.rotation.y  -= 0.001;
+						jupiter.rotation.y  -= 0.001;
+						saturn.rotation.y  -= 0.001;
+							saturnRing.rotation.z += 0.001;
+						uranus.rotation.y  -= 0.001;
+							uranusRing.rotation.z += 0.001;
+						neptune.rotation.y  -= 0.001;
 
-					// Adding noise movement
-					sunMaterial.uniforms[ 'time' ].value = noiseSpeed * ( Date.now() - start );
+						// Adding noise movement
+						sunMaterial.uniforms[ 'time' ].value = noiseSpeed * ( Date.now() - start );
 
-					//controls.update();
-					requestAnimationFrame( render );
-					renderer.render( scene, camera );
+						//controls.update();
+						requestAnimationFrame( render );
+						renderer.render( scene, camera );
 
-				}
+					}
 
-				window.addEventListener( 'resize', onWindowResize, false );
+					window.addEventListener( 'resize', onWindowResize, false );
 
-				render();
+					render();
 				// <!------------------------------------------------------------------------------------------------->
 			}
 		</script>
