@@ -564,7 +564,6 @@
 					lightDecay = 2.0, 
 					sunlight = new THREE.PointLight( lightColor, lightIntensity, lightDistance, lightDecay);
 				sunlight.power = lightIntensity * 4 * Math.PI; 
-				sunlight.castShadow = true;
 				sunlight.position.set( 0, 0, 0 );
 				scene.add( sunlight );
 
@@ -600,8 +599,6 @@
 									});
 				var sun = new THREE.Mesh( sunGeometry, sunMaterial );
 				sun.overdraw = true;
-				sun.castShadow = true;
-				sun.receiveShadow = false; // Default
 				scene.add( sun );
 
 				// Glow parameters
@@ -638,187 +635,187 @@
 			// <!--------------------------------- ADDING PLANETS TO SOLAR SYSTEM -------------------------------->
 
 				// Function that generates planets with images as textures
-				function generatePlanet(radius, text, posX, posY, posZ, rotSpeed, rot, orbitSpeed)
-				{
-					var geometry = new THREE.SphereGeometry( radius, 32, 32 ),
-						texture = new THREE.TextureLoader().load( text ); // Load texture
-					
-					//Wrap texture
-					texture.wrapS = texture.wrapT = THREE.MirroredRepeatWrapping;
-					texture.repeat.set( 1, 1 );
-					
-					//Mesh texture
-					var material = new THREE.MeshPhongMaterial({
-							map : texture,
-							side : THREE.DoubleSide
-						}),
-						planet = new THREE.Mesh( geometry, material );
-					//planet.castShadow = true; // Default is false
-	  				//planet.receiveShadow = false; // Default
-					
-					// Orbit radius and rotations
-					planet.orbitRadius = posX;
-					planet.rotSpeed = rotSpeed; 
-					planet.rot = rot;
-					planet.orbitSpeed = orbitSpeed; //(0.02 * 0.0048) * 0.25;
-					planet.orbit = Math.PI * 2;
-					planet.position.set(planet.orbitRadius, posY, posZ);
+					function generatePlanet(radius, text, posX, posY, posZ, rotSpeed, rot, orbitSpeed)
+					{
+						var geometry = new THREE.SphereGeometry( radius, 32, 32 ),
+							texture = new THREE.TextureLoader().load( text ); // Load texture
+						
+						//Wrap texture
+						texture.wrapS = texture.wrapT = THREE.MirroredRepeatWrapping;
+						texture.repeat.set( 1, 1 );
+						
+						//Mesh texture
+						var material = new THREE.MeshPhongMaterial({
+								map : texture,
+								side : THREE.DoubleSide
+							}),
+							planet = new THREE.Mesh( geometry, material );
+						
+						// Orbit radius and rotations
+						planet.orbitRadius = posX;
+						planet.rotSpeed = rotSpeed; 
+						planet.rot = rot;
+						planet.orbitSpeed = orbitSpeed; //(0.02 * 0.0048) * 0.25;
+						planet.orbit = Math.PI * 2;
+						planet.position.set(planet.orbitRadius, posY, posZ);
 
-					scene.add(planet);
+						scene.add(planet);
 
-					return planet;
-				}
-
-				// Function that generates planets orbit path around the sun
-				function generatePlanetOrbit(orbitRad)
-				{
-					var orbit = new THREE.Line(
-						new THREE.CircleGeometry(orbitRad, 100),
-						new THREE.MeshBasicMaterial({
-						  color: 0xffffff,
-						  transparent: true,
-						  opacity: 0.8,
-						  side: THREE.BackSide
-						})
-					);
-					orbit.geometry.vertices.shift();
-					orbit.rotation.x = THREE.Math.degToRad(90);
-
-					scene.add(orbit);
-					return orbit; 
-				}
+						return planet;
+					}
 
 				// Function that generates planets rings with images as textures
-				function generatePlanetRing(planet, inR, outR, thetaSeg, phiSeg,thetaStart, thetaLength, text, posX, posY, posZ)
-				{
-					var ringgeometry = new THREE.RingGeometry(inR, outR, thetaSeg, phiSeg, thetaStart, thetaLength),
-						texture = new THREE.TextureLoader().load( text );
+					function generatePlanetRing(planet, inR, outR, thetaSeg, phiSeg,thetaStart, thetaLength, text, posX, posY, posZ)
+					{
+						var ringgeometry = new THREE.RingGeometry(inR, outR, thetaSeg, phiSeg, thetaStart, thetaLength),
+							texture = new THREE.TextureLoader().load( text );
 
-					const uniforms = THREE.UniformsUtils.merge([
-					    THREE.UniformsLib.ambient,
-					    THREE.UniformsLib.lights,
-					    THREE.UniformsLib.shadowmap,
-					    {
-					      ringTexture: { value: null },
-					      innerRadius: { value: 0 },
-					      outerRadius: { value: 0 },
-					      lightPosition: { value: null }
-					    }
-					  ]);
-					  uniforms.ringTexture.value = texture;
-					  uniforms.innerRadius.value = inR;
-					  uniforms.outerRadius.value = outR;
-					  uniforms.lightPosition.value = new THREE.Vector3(-5, 5, 1);
+						const uniforms = THREE.UniformsUtils.merge([
+						    THREE.UniformsLib.ambient,
+						    THREE.UniformsLib.lights,
+						    THREE.UniformsLib.shadowmap,
+						    {
+						      ringTexture: { value: null },
+						      innerRadius: { value: 0 },
+						      outerRadius: { value: 0 },
+						      lightPosition: { value: null }
+						    }
+						  ]);
+						  uniforms.ringTexture.value = texture;
+						  uniforms.innerRadius.value = inR;
+						  uniforms.outerRadius.value = outR;
+						  uniforms.lightPosition.value = new THREE.Vector3(-5, 5, 1);
 
-					  const ringmaterial = new THREE.ShaderMaterial({
-						    uniforms,
-						    vertexShader: `
-								varying vec3 vPos;                                                     
-								varying vec3 vWorldPosition;                                           
-								varying vec3 vNormal;                                                 
+						  const ringmaterial = new THREE.ShaderMaterial({
+							    uniforms,
+							    vertexShader: `
+									varying vec3 vPos;                                                     
+									varying vec3 vWorldPosition;                                           
+									varying vec3 vNormal;                                                 
 
-								${THREE.ShaderChunk["shadowmap_pars_vertex"]}                         
+									${THREE.ShaderChunk["shadowmap_pars_vertex"]}                         
 
-								void main() {                                                         
-								  vPos = position;                                                     
-								  //vec4 worldPosition = (modelViewMatrix * vec4(position, 1.));         
-								  vec4 worldPosition = modelMatrix * vec4(position, 1.0);
+									void main() {                                                         
+									  vPos = position;                                                     
+									  //vec4 worldPosition = (modelViewMatrix * vec4(position, 1.));         
+									  vec4 worldPosition = modelMatrix * vec4(position, 1.0);
 
-								  gl_Position = projectionMatrix * viewMatrix * vec4(worldPosition.xyz, 1.);       
+									  gl_Position = projectionMatrix * viewMatrix * vec4(worldPosition.xyz, 1.);       
 
-								  vNormal = normalMatrix * normal;                                     
-								  vWorldPosition = worldPosition.xyz;                                 
+									  vNormal = normalMatrix * normal;                                     
+									  vWorldPosition = worldPosition.xyz;                                 
 
-								  ${THREE.ShaderChunk["shadowmap_vertex"]}
-								}   
-								    `,
-						    fragmentShader: `
-								uniform sampler2D ringTexture;
-								uniform float innerRadius;
-								uniform float outerRadius;
-								uniform vec3 lightPosition;
-								varying vec3 vPos;
+									  ${THREE.ShaderChunk["shadowmap_vertex"]}
+									}   
+									    `,
+							    fragmentShader: `
+									uniform sampler2D ringTexture;
+									uniform float innerRadius;
+									uniform float outerRadius;
+									uniform vec3 lightPosition;
+									varying vec3 vPos;
 
-								${THREE.ShaderChunk["common"]}
-								${THREE.ShaderChunk["packing"]}
-								${THREE.ShaderChunk["bsdfs"]}
-								${THREE.ShaderChunk["lights_pars_begin"]}
-								${THREE.ShaderChunk["shadowmap_pars_fragment"]}
-								${THREE.ShaderChunk["shadowmask_pars_fragment"]}
+									${THREE.ShaderChunk["common"]}
+									${THREE.ShaderChunk["packing"]}
+									${THREE.ShaderChunk["bsdfs"]}
+									${THREE.ShaderChunk["lights_pars_begin"]}
+									${THREE.ShaderChunk["shadowmap_pars_fragment"]}
+									${THREE.ShaderChunk["shadowmask_pars_fragment"]}
 
-								vec4 color() {
-								  vec2 uv = vec2(0);
-								  uv.x = (length(vPos) - innerRadius) / (outerRadius - innerRadius);
-								  if (uv.x < 0.0 || uv.x > 1.0) {
-								    discard;
-								  }                                                                           
-								  vec4 pixel = texture2D(ringTexture, uv);
-								  return pixel;
-								}
+									vec4 color() {
+									  vec2 uv = vec2(0);
+									  uv.x = (length(vPos) - innerRadius) / (outerRadius - innerRadius);
+									  if (uv.x < 0.0 || uv.x > 1.0) {
+									    discard;
+									  }                                                                           
+									  vec4 pixel = texture2D(ringTexture, uv);
+									  return pixel;
+									}
 
-								void main() {
-								  gl_FragColor = color() * vec4(vec3(getShadowMask()), 1.0);
-								}
-								    `,
-						    transparent: true,
-						    lights: true,
-						    side: THREE.DoubleSide,
-					  });
-						
-					var	ring = new THREE.Mesh( ringgeometry, ringmaterial );
-					ring.castShadow = true;
-	  				ring.receiveShadow = false;
-					ring.rotation.x = THREE.Math.degToRad(90);
+									void main() {
+									  gl_FragColor = color() * vec4(vec3(getShadowMask()), 1.0);
+									}
+									    `,
+							    transparent: true,
+							    lights: true,
+							    side: THREE.DoubleSide,
+						  });
+							
+						var	ring = new THREE.Mesh( ringgeometry, ringmaterial );
+						ring.castShadow = true;
+		  				ring.receiveShadow = false;
+						ring.rotation.x = THREE.Math.degToRad(90);
 
-					planet.add(ring);
+						planet.add(ring);
 
-					return ring; 
-				}
+						return ring; 
+					}
 
-					// Positions, Rotations, Rotation Speed, Orbit Speed 
-					// Sources: https://nssdc.gsfc.nasa.gov/planetary/factsheet/
-					// 			http://www.qrg.northwestern.edu/projects/vss/docs/space-environment/3-orbital-lengths-distances.html
-				var earthPosX = 93.0, earthPosY = 0, earthPosZ = 0,						// 93,000,000 miles from the sun //47.4
-						earRS = 0.005*0.01,
-						earR = 2.0,  
-						earOS = 0.005,				// We set 0.005 as 1 Earth year
-					mercuryPosX = 36.8, mercuryPosY = 0, mercuryPosZ = 0,				// 36,800,000 miles from the sun //40.6
-						merRS = 0.005*0.01, 
-						merR = 2.0, 
-						merOS = earOS * (12/3),		// 3 Earth months
-					venusPosX = 67.2, venusPosY = 0, venusPosZ = 0,						// 67,200,000 miles from the sun //43.8
-						venRS = 0.005*0.01, 
-						venR = 2.0,  
-						venOS = earOS * (12/7), 	// 7 Earth months
-					moonPosX = earthPosX + 0.238855, moonPosY = 2, moonPosZ = -2, 		// 238 855 miles from the earth //47.4, 2, -2
-						monRS = 0.005*0.01, 
-						monR = 2.0,  
-						monOS = 0.01,
-					marsPosX = 141.6, marsPosY = 0, marsPosZ = 0, 						// 141,600,000 miles from the sun //50.6
-						marRS = 0.005*0.01, 
-						marR = 2.0,  
-						marOS = earOS * (12/23),	// 23 Earth months
-					jupiterPosX = 483.6, jupiterPosY = 0, jupiterPosZ = 0,				// 483,600,000 miles from the sun //54.4
-						jupRS = 0.005*0.01, 
-						jupR = 2.0,  
-						jupOS = earOS * (12/142),	// 142 Earth months	
-					saturnPosX = 886.5, saturnPosY = 0, saturnPosZ = 0, 				// 886,500,000 miles from the sun //60.9
-						satRS = 0.005*0.01, 
-						satR = 2.0,  
-						satOS = earOS / 29.5,		// 354 Earth months (29.5 Earth years)
-					uranusPosX = 1783.7, uranusPosY = 0, uranusPosZ = 0, 				// 1,783,700,000 miles from the sun //68.4
-						uraRS = 0.005*0.01, 
-						uraR = 2.0,  
-						uraOS = earOS / 84.0,		// 1009 Earth months (84 Earth years)	
-					neptunePosX = 3670.1, neptunePosY = 0, neptunePosZ = 0, 			// 3,670,100,000 miles from the sun //74.6
-						nepRS = 0.005*0.01, 
-						nepR = 2.0,  
-						nepOS = earOS * (12/1979),	// 1979 Earth months (almost 165 Earth years)
+				// Function that generates planets orbit path around the sun
+					function generateOrbitLine(orbitRad)
+					{
+						var orbit = new THREE.LineLoop(
+							new THREE.CircleGeometry( orbitRad, 100 ),
+							new THREE.MeshBasicMaterial({
+							  color: 0xffffff,
+							  transparent: true,
+							  opacity: 0.8,
+							  side: THREE.BackSide
+							})
+						);
+						orbit.geometry.vertices.shift(); // Remove center vertex
+						orbit.rotation.x = THREE.Math.degToRad(90);
+
+						scene.add(orbit);
+						return orbit; 
+					}
+
+				// Positions, Rotations, Rotation Speed, Orbit Speed 
+				// Sources: http://www.qrg.northwestern.edu/projects/vss/docs/space-environment/3-orbital-lengths-distances.html
+				// 			https://nssdc.gsfc.nasa.gov/planetary/factsheet/
+				//			https://spaceplace.nasa.gov/days/en/
+				// 			https://www.space.com/24871-does-the-moon-rotate.html
+					var earthPosX = 93.0, earthPosY = 0, earthPosZ = 0,						// 93,000,000 miles from the sun //47.4
+							earRS = 0.01,					// We set 0.01 as 1 Earth day
+							earR = 2.0,					
+							earOS = 0.005,				// We set 0.005 as 1 Earth year
+						mercuryPosX = 36.8, mercuryPosY = 0, mercuryPosZ = 0,				// 36,800,000 miles from the sun //40.6
+							merRS = earRS * (24/1408),		// 1,408 Earth hours
+							merR = 2.0, 
+							merOS = earOS * (12/3),		// 3 Earth months
+						venusPosX = 67.2, venusPosY = 0, venusPosZ = 0,						// 67,200,000 miles from the sun //43.8
+							venRS =  earRS * (24/5832), 	// 	5,832 Earth hours
+							venR = 2.0,  
+							venOS = earOS * (12/7), 	// 7 Earth months
+						moonPosX = earthPosX + (0.238855), moonPosY = 0, moonPosZ = 0, 		// 238 855 miles from the earth //47.4, 2, -2
+							monRS = 0.005*0.01, 			// Orbits Earth once every 27.322 days
+							monR = 2.0,  
+							monOS = earRS * 27,				// 27 Earth days
+						marsPosX = 141.6, marsPosY = 0, marsPosZ = 0, 						// 141,600,000 miles from the sun //50.6
+							marRS =  earRS * (24/25), 		// 25 Earth hours
+							marR = 2.0,  
+							marOS = earOS * (12/23),	// 23 Earth months
+						jupiterPosX = 483.6, jupiterPosY = 0, jupiterPosZ = 0,				// 483,600,000 miles from the sun //54.4
+							jupRS =  earRS * (24/10), 		// 10 Earth hours
+							jupR = 2.0,  
+							jupOS = earOS * (12/142),	// 142 Earth months	
+						saturnPosX = 886.5, saturnPosY = 0, saturnPosZ = 0, 				// 886,500,000 miles from the sun //60.9
+							satRS =  earRS * (24/11), 		// 11 Earth hours
+							satR = 2.0,  
+							satOS = earOS / 29.5,		// 29.5 Earth years
+						uranusPosX = 1783.7, uranusPosY = 0, uranusPosZ = 0, 				// 1,783,700,000 miles from the sun //68.4
+							uraRS =  earRS * (24/17), 		// 17 Earth hours
+							uraR = 2.0,  
+							uraOS = earOS / 84.0,		// 84 Earth years
+						neptunePosX = 3670.1, neptunePosY = 0, neptunePosZ = 0, 			// 3,670,100,000 miles from the sun //74.6
+							nepRS =  earRS * (24/16), 		// 16 Earth hours
+							nepR = 2.0,  
+							nepOS = earOS * (12/1979),	// 1979 Earth months
 
 					// Size of the planets
-					// Sources: https://www.universetoday.com/36649/planets-in-order-of-size/
-					//			http://coolcosmos.ipac.caltech.edu/ask/167-How-small-is-the-Moon-compared-to-Earth-
+					// Sources: http://coolcosmos.ipac.caltech.edu/ask/167-How-small-is-the-Moon-compared-to-Earth-
 					//			http://coolcosmos.ipac.caltech.edu/ask/5-How-large-is-the-Sun-compared-to-Earth-
+					//			https://www.universetoday.com/36649/planets-in-order-of-size/
 					earSize = sunSize / 109,			// (6,371 km / 3,959 miles) 	- Earth is nearly 109 times smaller than the sun
 					merSize = earSize * 0.38, 			// (2,440 km / 1,516 miles)		– 38% the size of Earth
 					venSize = earSize * 0.95, 			// (6,052 km / 3,761 miles) 	– 95% the size of Earth
@@ -845,8 +842,8 @@
 					// Earth + Clouds
 				var geometryEarth = new THREE.SphereGeometry(1.4, 32, 32),
 					geometryClouds = new THREE.SphereGeometry(1.42, 32, 32),
-					geometryMoon = new THREE.SphereGeometry(0.6, 32, 32),
-					materialEarth = new THREE.MeshPhongMaterial({
+					geometryMoon = new THREE.SphereGeometry(0.9, 32, 32),
+					materialEarth = new THREE.MeshStandardMaterial({
 						map 		: new THREE.TextureLoader().load('img/textures/earth.jpg'),
 						bumpMap 	: new THREE.TextureLoader().load('img/textures/earthbump.jpg'),
 						bumpScale 	: 0.05,
@@ -863,52 +860,58 @@
 					materialMoon  = new THREE.MeshPhongMaterial({
 						map     	: new THREE.TextureLoader().load('img/textures/moon.jpg'),
 						side        : THREE.DoubleSide,
-						opacity     : 0.6,
-						transparent : true,
-						depthWrite  : false
 					}),
 					earth = new THREE.Mesh(geometryEarth, materialEarth),
 					clouds = new THREE.Mesh(geometryClouds, materialClouds),
 					moon = new THREE.Mesh(geometryMoon, materialMoon);
-					earth.castShadow = true;
-					earth.receiveShadow = false;
-					clouds.castShadow = true;
-					clouds.receiveShadow = false;
-					moon.castShadow = true;
-					moon.receiveShadow = false;
 					moon.position.x = moonPosX;
 					moon.position.y = moonPosY;
 					moon.position.z = moonPosZ;
 					
 					// Orbit radius and rotations
-					earth.orbitRadius = earthPosX;
-					earth.rotSpeed = earRS;
-					earth.rot = earR;
-					earth.orbitSpeed = earOS; //(0.02 * 0.0048) * 0.25;
-					earth.orbit = Math.PI * 2;
-					earth.position.set(earth.orbitRadius, earthPosY, earthPosZ);
+					//earth.orbitRadius = earthPosX;
+					//earth.rotSpeed = earRS;
+					//earth.rot = earR;
+					//earth.orbitSpeed = earOS;
+					//earth.orbit = Math.PI * 2;
+					//earth.position.set(earth.orbitRadius, earthPosY, earthPosZ);
 
-					moon.orbitRadius = moonPosX;
-					moon.rotSpeed = monRS;
-					moon.rot = monR;
-					moon.orbitSpeed = monOS; //(0.02 * 0.0048) * 0.25;
-					moon.orbit = Math.PI * 2;
-					moon.position.set(moon.orbitRadius, moonPosY, moonPosZ);
+					//moon.orbitRadius = moonPosX;
+					//moon.rotSpeed = monRS;
+					//moon.rot = monR;
+					//moon.orbitSpeed = monOS;
+					//moon.orbit = Math.PI * 2;
+					//moon.position.set(moon.orbitRadius, moonPosY, moonPosZ);
 
-					scene.add(earth);
-					earth.add(clouds);
+					//scene.add(earth);
+					//earth.add(clouds);
 					//earth.add(moon);
 
+					var earthGroup = new THREE.Group();
+						earthGroup.add( earth );
+						earthGroup.add( clouds );
+						earthGroup.add( moon );
+
+					// Orbit radius and rotations
+					earthGroup.orbitRadius = earthPosX;
+					earthGroup.rotSpeed = earRS;
+					earthGroup.rot = earR;
+					earthGroup.orbitSpeed = earOS;
+					earthGroup.orbit = Math.PI * 2;
+					earthGroup.position.set(earth.orbitRadius, earthPosY, earthPosZ);
+
+					scene.add( earthGroup );
+
 				// Adding planets orbits around the sun
-				var mercuryOrbit = generatePlanetOrbit(mercuryPosX), // mercuryPosY, mercuryPosZ),
-					venusOrbit = generatePlanetOrbit(venusPosX), // venusPosY, venusPosZ),
-					earthOrbit = generatePlanetOrbit(earthPosX), // earthPosY, earthPosZ),
-					moonOrbit = generatePlanetOrbit(moonPosX), //moonPosY, moonPosX),
-					marsOrbit = generatePlanetOrbit(marsPosX), // marsPosY, marsPosZ),
-					jupiterOrbit = generatePlanetOrbit(jupiterPosX), // jupiterPosY, jupiterPosZ),
-					saturnOrbit = generatePlanetOrbit(saturnPosX), //saturnPosY, saturnPosZ),
-					uranusOrbit = generatePlanetOrbit(uranusPosX), // uranusPosY, uranusPosZ),
-					neptuneOrbit = generatePlanetOrbit(neptunePosX); //, neptunePosY, neptunePosZ);
+				var mercuryOrbit = generateOrbitLine(mercuryPosX), // mercuryPosY, mercuryPosZ),
+					venusOrbit = generateOrbitLine(venusPosX), // venusPosY, venusPosZ),
+					earthOrbit = generateOrbitLine(earthPosX), // earthPosY, earthPosZ),
+					//moonOrbit = generateOrbitLine(moonPosX), //moonPosY, moonPosX),
+					marsOrbit = generateOrbitLine(marsPosX), // marsPosY, marsPosZ),
+					jupiterOrbit = generateOrbitLine(jupiterPosX), // jupiterPosY, jupiterPosZ),
+					saturnOrbit = generateOrbitLine(saturnPosX), //saturnPosY, saturnPosZ),
+					uranusOrbit = generateOrbitLine(uranusPosX), // uranusPosY, uranusPosZ),
+					neptuneOrbit = generateOrbitLine(neptunePosX); //, neptunePosY, neptunePosZ);
 
 				// CREATING THE STARRY BACKGROUND
 					// Create particles
@@ -1007,7 +1010,7 @@
 					    camera.position.z = neptune.position.z; 
 					    controls.update();
 					  };
-				  this.Orbit_Speed = 0;
+				  //this.Orbit_Speed = 0;
 				  this.Highlight_Color = highlight;
 				  this.Blend_Color = blend;
 				  this.Inner_Glow = innerGlow;
@@ -1022,9 +1025,6 @@
 				  	// Camera
 				  	controls.reset();
 				    controls.update();
-
-				    // Orbit
-				    //orbitspeed = 0; 
 
 				    // Sun
 				    highlight = 0xcc9900;
@@ -1085,9 +1085,9 @@
 					cameraPos.add( controller, 'Neptune');
 
 				// Change orbits speed
-				gui.add( controller, 'Orbit_Speed', 0, 1).onChange( function() {
+				//gui.add( controller, 'Orbit_Speed', 0, 1).onChange( function() {
 					//orbitSpeed = (controller.Orbit_Speed);
-				}).name('Orbit Speed');
+				//}).name('Orbit Speed');
 
 				// Color folder
 				var colorFolder = gui.addFolder('Colors of the sun');
@@ -1157,41 +1157,44 @@
 
 				function render() {
 
-					// Rotations
-					//particleSystem.rotation.y -= 0.001;
-					sun.rotation.y -= 0.001;
-					
-					clouds.rotation.y  -= 0.001;
-					moon.rotation.y  -= 0.001;
-
-					saturnRing.rotation.z += 0.001;
-					uranusRing.rotation.z += 0.001;
-
 					// Updating the planets orbits around the sun
-					function planetUpdate(planet, planetOrbit)
+					function planetUpdate(planet)
 					{
 						// Planets rotations
-						planet.rot += planet.rotSpeed
+						planet.rot += planet.rotSpeed;
 					    planet.rotation.set(0, planet.rot, 0);
 
 					    // Planets orbit 
 					    planet.orbit += planet.orbitSpeed;
 					    planet.position.set(Math.cos(planet.orbit) * planet.orbitRadius, 0, Math.sin(planet.orbit) * planet.orbitRadius);
-					    
-					    // Orbit line
-					    planetOrbit.rotation.z += planet.orbitSpeed;
 					}
 
-					planetUpdate(mercury, mercuryOrbit);
-					planetUpdate(venus, venusOrbit);
-					planetUpdate(earth, earthOrbit);
-					planetUpdate(moon, moonOrbit);
-					planetUpdate(mars, marsOrbit);
-					planetUpdate(jupiter, jupiterOrbit);
-					planetUpdate(saturn, saturnOrbit);
-					planetUpdate(uranus, uranusOrbit);
-					planetUpdate(neptune, neptuneOrbit);
+					function earthUpdate(group, planet)
+					{
+						// Planets rotations
+						group.rot += group.rotSpeed;
+					    group.rotation.set(0, group.rot, 0);
 
+					    // Planets orbit 
+					    group.orbit += group.orbitSpeed;
+					    group.position.set(Math.cos(group.orbit) * group.orbitRadius, 0, Math.sin(group.orbit) * group.orbitRadius);
+					}
+
+					planetUpdate(mercury);
+					planetUpdate(venus);
+					planetUpdate(mars);
+					planetUpdate(jupiter);
+					planetUpdate(saturn);
+					planetUpdate(uranus);
+					planetUpdate(neptune);
+
+					earthUpdate(earthGroup, earth);
+
+					// Rotations
+					particleSystem.rotation.y -= 0.0001;
+					sun.rotation.y -= 0.0001;
+					clouds.rotation.y  -= 0.0005;
+					moon.rotation.y  -= 0.001;
 
 					// Adding noise movement
 					sunMaterial.uniforms[ 'time' ].value = noiseSpeed * ( Date.now() - start );
