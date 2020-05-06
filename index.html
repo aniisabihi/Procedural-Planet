@@ -994,37 +994,50 @@
 				  this.Reset = function (){
 				  	// Camera
 				  	camera.position.set(cameraPosX,cameraPosY,cameraPosZ);
+				  	controller.positionX = cameraPosX;
+				  	controller.positionY = cameraPosY;
+				  	controller.positionZ = cameraPosZ;
 				  	controls.reset();
 				    controls.update();
 
 				    // Sun
 				    highlight = 0xcc9900;
 				    sunMaterial.uniforms.highlight = {value: new THREE.Color(highlight)};
+				    controller.Highlight_Color = highlight;
 					blend = 0xff0000;
 					sunMaterial.uniforms.blend = {value: new THREE.Color(blend)};
+					controller.Blend_Color = blend;
 					innerGlow = 0x000000;
 					sunMaterial.uniforms.innerGlow = {value: new THREE.Color(innerGlow)};
+					controller.Inner_Glow = innerGlow;
 
 					// Sun Glow
 					glowSize = sunSize + 5;
 					glow.scale.x = glowSize * 0.044;
 					glow.scale.y = glowSize * 0.044;
 					glow.scale.z = glowSize * 0.044;
+					controller.Glow_Size = glowSize;
 					glowColor = 0xe65c00;
 					glowMaterial.uniforms.glowColor = { type: "c", value: new THREE.Color(glowColor) };
+					controller.Glow_Color = glowColor;
 					glowSharpness = 0.2;
 					glowMaterial.uniforms.c = { type: "f", value: glowSharpness };
+					controller.Glow_Sharpness = glowSharpness;
 					glowOpacity = 1.0;
 					glowMaterial.uniforms.opacity = { value: glowOpacity };
+					controller.Glow_Opacity = glowOpacity;
 
 					// Noise 
 					noiseSpeed = .000030;
+					controller.Noise_Speed = noiseSpeed;
 					noiseSize = -0.10;
 					sunMaterial.uniforms.noise_size = {value: noiseSize};
 					glowMaterial.uniforms.noise_size = {value: noiseSize};
+					controller.Noise_Size = noiseSize;
 					noiseDisplacement = -0.30;
 					sunMaterial.uniforms.displacementSize = {value: noiseDisplacement};
 					glowMaterial.uniforms.displacementSize = {value: noiseDisplacement};
+					controller.Noise_Displacement = noiseDisplacement;
 				  };
 				};
 
@@ -1035,38 +1048,38 @@
 					cameraPos.add(controller, 'positionX', -100, 100).onChange( function() {
 					   camera.position.x = controller.positionX;
 					   controls.update();
-					}).name('X');
+					}).listen().name('X');
 					cameraPos.add(controller, 'positionY', -100, 100).onChange( function() {
 					   camera.position.y = controller.positionY;
 					   controls.update();
-					}).name('Y');
+					}).listen().name('Y');
 					cameraPos.add(controller, 'positionZ', -100, 100).onChange( function() {
 					   camera.position.z = controller.positionZ;
 					   controls.update();
-					}).name('Z');
-					cameraPos.add( controller, 'Mercury');
-					cameraPos.add( controller, 'Venus');
-					cameraPos.add( controller, 'Earth');
-					cameraPos.add( controller, 'Mars');
-					cameraPos.add( controller, 'Jupiter');
-					cameraPos.add( controller, 'Saturn');
-					cameraPos.add( controller, 'Uranus');
-					cameraPos.add( controller, 'Neptune');
+					}).listen().name('Z');
+					cameraPos.add( controller, 'Mercury').listen();
+					cameraPos.add( controller, 'Venus').listen();
+					cameraPos.add( controller, 'Earth').listen();
+					cameraPos.add( controller, 'Mars').listen();
+					cameraPos.add( controller, 'Jupiter').listen();
+					cameraPos.add( controller, 'Saturn').listen();
+					cameraPos.add( controller, 'Uranus').listen();
+					cameraPos.add( controller, 'Neptune').listen();
 
 				// Color folder
 				var colorFolder = gui.addFolder('Colors of the sun');
 					colorFolder.addColor(controller, 'Highlight_Color', highlight ).onChange( function() {
 						highlight = controller.Highlight_Color;
 						sunMaterial.uniforms.highlight = {value: new THREE.Color(highlight)};
-					}).name('Highlight Color');
+					}).listen().name('Highlight Color');
 					colorFolder.addColor(controller, 'Blend_Color', blend ).onChange( function() {
 						blend = controller.Blend_Color;
 						sunMaterial.uniforms.blend = {value: new THREE.Color(blend)};
-					}).name('Blending Color');
+					}).listen().name('Blending Color');
 					colorFolder.addColor(controller, 'Inner_Glow', innerGlow ).onChange( function() {
 						innerGlow = controller.Inner_Glow;
 						sunMaterial.uniforms.innerGlow = {value: new THREE.Color(innerGlow)};
-					}).name('Inner Glow');
+					}).listen().name('Inner Glow');
 
 				// Glow folder
 				var glowFolder = gui.addFolder('Sun glow');
@@ -1076,35 +1089,35 @@
 						glow.scale.x = scale;
 						glow.scale.y = scale;
 						glow.scale.z = scale;
-					} ).name('Size');
+					} ).listen().name('Size');
 					//glowFolder.addColor(controller, 'Glow_Color', glowColor ).onChange( function() {
 						//glowColor = controller.Glow_Colo;
 						//glowMaterial.uniforms.glowColor = {value: new THREE.Color(glowColor)};
-					//}).name('Color');
+					//}).listen().name('Color');
 					glowFolder.add(controller, 'Glow_Sharpness', 0.0, 1.0 ).onChange( function() {
 						glowSharpness = controller.Glow_Sharpness;
 						glowMaterial.uniforms.c = { type: "f", value: glowSharpness };
-					}).name('Sharpness');
+					}).listen().name('Sharpness');
 					glowFolder.add( controller, 'Glow_Opacity', 0.0, 1.0 ).onChange( function() {
 				  		glowOpacity = controller.Glow_Opacity;
 				  		glowMaterial.uniforms.opacity = { value: glowOpacity };
-					} ).name('Opacity');
+					} ).listen().name('Opacity');
 
 				// Noise folder 
 				var noiseFolder = gui.addFolder('Sun noise');
 					noiseFolder.add( controller, 'Noise_Speed', 0.0, 0.001).onChange( function() {
 						noiseSpeed = controller.Noise_Speed;
-					}).name('Speed');
+					}).listen().name('Speed');
 					noiseFolder.add( controller, 'Noise_Size', -1.0, -0.0).onChange( function() {
 						noiseSize = controller.Noise_Size;
 						sunMaterial.uniforms.noise_size = {value: noiseSize};
 						glowMaterial.uniforms.noise_size = {value: noiseSize};
-					}).name('Size');
+					}).listen().name('Size');
 					noiseFolder.add( controller, 'Noise_Displacement', -2.0, -0.0).onChange( function() {
 						noiseDisplacement = controller.Noise_Displacement;
 						sunMaterial.uniforms.displacementSize = {value: noiseDisplacement};
 						glowMaterial.uniforms.displacementSize = {value: noiseDisplacement};
-					}).name('Displacement');
+					}).listen().name('Displacement');
 
 				// Reset button
 				gui.add( controller, 'Reset').name('Reset settings');
