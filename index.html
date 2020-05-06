@@ -233,7 +233,6 @@
 			  float displacement = - 5. * noise + b;
 
 			  vec3 newPosition = position + normal * ( displacement * displacementSize);
-
 			  gl_Position = projectionMatrix * modelViewMatrix * vec4( newPosition, 1.0 );
 			}
 		</script>
@@ -250,8 +249,8 @@
 	      uniform vec3 blend; 
 	      uniform vec3 innerGlow; 
 
-	      void main() {
-
+	      void main() 
+	      {
 	      	vec3 colormix1 = mix(highlight, highlightBlend, (1. - 2. * noise2));
 	      	vec3 colormix2 = mix(blend, innerGlow, (1. - 2. * noise));
 	      	vec3 colorNoise = mix(colormix1, colormix2, (1. -2. * noise)); 
@@ -443,7 +442,6 @@
 			// -------------------------------------------------------------->
 
 			varying float noise;
-			varying float noise2; 
 			uniform float time;
 			varying float intensity;
 			uniform vec3 viewVector;
@@ -466,7 +464,6 @@
 			void main() {
 
 			  noise = 18.0 *  noise_size * turbulence( normal + time );
-			  noise2 = 10.0 *  noise_size * turbulence( normal + time );
 			  float b = 5.0 * pnoise( 0.05 * position + vec3( 2.0 * time ), vec3( 100.0 ) );
 			  float displacement = - 5. * noise + b;
 
@@ -475,7 +472,6 @@
 		      intensity = pow( c - dot(vNormal, vNormel), p );
 
 			  vec3 newPosition = position + normal * ( displacement * displacementSize);
-
 			  gl_Position = projectionMatrix * modelViewMatrix * vec4( newPosition, 1.0 );
 			}
 		</script>
@@ -484,26 +480,23 @@
 		<script type="x-shader/x-fragment" id="glowFS">
 
 			varying float noise;
-			varying float noise2;
 			varying float intensity;
 
 			// Gui parameters
 			uniform vec3 glowColor;
 			uniform float opacity;
 
-			void main() {
-
+			void main()
+			{
 				vec3 glow = glowColor * intensity;
-				vec3 colormix1 = mix(glow, glow, (1. - 2. * noise2));
-		      	vec3 colormix2 = mix(glow, glow, (1. - 2. * noise));
-		      	vec3 colorNoise = mix(colormix1, colormix2, (1. -2. * noise)); 
+		      	vec3 colorNoise = mix(glow, glow, (1. -2. * noise)); 
 				gl_FragColor = vec4( colorNoise, opacity);
 			}
 		</script>
 
 		<!------------------ MAIN SCRIPT --------------------->
 		<script type="module" id="main">
-
+			
 			// Importing scripts to work not only locally but on github.io 
 			import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.112.0/build/three.module.js";
 		   	import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.112.0/examples/jsm/controls/OrbitControls.js";
@@ -522,7 +515,6 @@
 			window.addEventListener( 'load', init );
 
 			function init() {
-
 			// <!----------------------------------- SETTING UP SCENE -------------------------------------------->
 				container = document.getElementById( 'container' );
 				scene = new THREE.Scene();
@@ -912,19 +904,18 @@
 
 				// Create the individual particles
 				for (var p = 0; p < particleCount; p++) {
-				  // Create a particle with random x position (-120, 120)
-				  var pX = Math.random() * 240 - 120,
-				      pY = Math.random() * 240 - 120,
-				      pZ = Math.random() * 240 - 120,
+				  // Create a particle with random x position
+				  var pX = Math.random() * 840 - 320,
+				      pY = Math.random() * 840 - 320,
+				      pZ = Math.random() * 840 - 320,
 				      particle = new THREE.Vector3(pX, pY, pZ);
-
 				  particles.vertices.push(particle);
 				}
 
 				// Create the particle system
 				var particleSystem = new THREE.Points(particles, pMaterial);
 				particleSystem.sortParticles = true;
-				//scene.add(particleSystem);
+				scene.add(particleSystem);
 			// <!------------------------------------------------------------------------------------------------->
 
 			// <!----------------------------------- CREATING GUI ------------------------------------------------>
@@ -992,54 +983,54 @@
 				  this.Noise_Size = noiseSize; 
 				  this.Noise_Displacement = noiseDisplacement; 
 				  this.Reset = function (){
-				  	// Camera
-				  	camera.position.set(cameraPosX,cameraPosY,cameraPosZ);
-				  	controller.positionX = cameraPosX;
-				  	controller.positionY = cameraPosY;
-				  	controller.positionZ = cameraPosZ;
-				  	controls.reset();
-				    controls.update();
+					  	// Camera
+					  	camera.position.set(cameraPosX,cameraPosY,cameraPosZ);
+					  	controller.positionX = cameraPosX;
+					  	controller.positionY = cameraPosY;
+					  	controller.positionZ = cameraPosZ;
+					  	controls.reset();
+					    controls.update();
 
-				    // Sun
-				    highlight = 0xcc9900;
-				    sunMaterial.uniforms.highlight = {value: new THREE.Color(highlight)};
-				    controller.Highlight_Color = highlight;
-					blend = 0xff0000;
-					sunMaterial.uniforms.blend = {value: new THREE.Color(blend)};
-					controller.Blend_Color = blend;
-					innerGlow = 0x000000;
-					sunMaterial.uniforms.innerGlow = {value: new THREE.Color(innerGlow)};
-					controller.Inner_Glow = innerGlow;
+					    // Sun
+					    highlight = 0xcc9900;
+					    sunMaterial.uniforms.highlight = {value: new THREE.Color(highlight)};
+					    controller.Highlight_Color = highlight;
+						blend = 0xff0000;
+						sunMaterial.uniforms.blend = {value: new THREE.Color(blend)};
+						controller.Blend_Color = blend;
+						innerGlow = 0x000000;
+						sunMaterial.uniforms.innerGlow = {value: new THREE.Color(innerGlow)};
+						controller.Inner_Glow = innerGlow;
 
-					// Sun Glow
-					glowSize = sunSize + 5;
-					glow.scale.x = glowSize * 0.044;
-					glow.scale.y = glowSize * 0.044;
-					glow.scale.z = glowSize * 0.044;
-					controller.Glow_Size = glowSize;
-					glowColor = 0xe65c00;
-					glowMaterial.uniforms.glowColor = { type: "c", value: new THREE.Color(glowColor) };
-					controller.Glow_Color = glowColor;
-					glowSharpness = 0.2;
-					glowMaterial.uniforms.c = { type: "f", value: glowSharpness };
-					controller.Glow_Sharpness = glowSharpness;
-					glowOpacity = 1.0;
-					glowMaterial.uniforms.opacity = { value: glowOpacity };
-					controller.Glow_Opacity = glowOpacity;
+						// Sun Glow
+						glowSize = sunSize + 5;
+						glow.scale.x = glowSize * 0.044;
+						glow.scale.y = glowSize * 0.044;
+						glow.scale.z = glowSize * 0.044;
+						controller.Glow_Size = glowSize;
+						glowColor = 0xe65c00;
+						glowMaterial.uniforms.glowColor = { type: "c", value: new THREE.Color(glowColor) };
+						controller.Glow_Color = glowColor;
+						glowSharpness = 0.2;
+						glowMaterial.uniforms.c = { type: "f", value: glowSharpness };
+						controller.Glow_Sharpness = glowSharpness;
+						glowOpacity = 1.0;
+						glowMaterial.uniforms.opacity = { value: glowOpacity };
+						controller.Glow_Opacity = glowOpacity;
 
-					// Noise 
-					noiseSpeed = .000030;
-					controller.Noise_Speed = noiseSpeed;
-					noiseSize = -0.10;
-					sunMaterial.uniforms.noise_size = {value: noiseSize};
-					glowMaterial.uniforms.noise_size = {value: noiseSize};
-					controller.Noise_Size = noiseSize;
-					noiseDisplacement = -0.30;
-					sunMaterial.uniforms.displacementSize = {value: noiseDisplacement};
-					glowMaterial.uniforms.displacementSize = {value: noiseDisplacement};
-					controller.Noise_Displacement = noiseDisplacement;
-				  };
-				};
+						// Noise 
+						noiseSpeed = .000030;
+						controller.Noise_Speed = noiseSpeed;
+						noiseSize = -0.10;
+						sunMaterial.uniforms.noise_size = {value: noiseSize};
+						glowMaterial.uniforms.noise_size = {value: noiseSize};
+						controller.Noise_Size = noiseSize;
+						noiseDisplacement = -0.30;
+						sunMaterial.uniforms.displacementSize = {value: noiseDisplacement};
+						glowMaterial.uniforms.displacementSize = {value: noiseDisplacement};
+						controller.Noise_Displacement = noiseDisplacement;
+					  };
+					};
 
 				var gui = new dat.GUI({name: 'Control the solar system'});
 				
@@ -1090,10 +1081,10 @@
 						glow.scale.y = scale;
 						glow.scale.z = scale;
 					} ).listen().name('Size');
-					//glowFolder.addColor(controller, 'Glow_Color', glowColor ).onChange( function() {
-						//glowColor = controller.Glow_Colo;
-						//glowMaterial.uniforms.glowColor = {value: new THREE.Color(glowColor)};
-					//}).listen().name('Color');
+					glowFolder.addColor(controller, 'Glow_Color', glowColor ).onChange( function() {
+						glowColor = controller.Glow_Colo;
+						glowMaterial.uniforms.glowColor = {value: new THREE.Color(glowColor)};
+					}).listen().name('Color');
 					glowFolder.add(controller, 'Glow_Sharpness', 0.0, 1.0 ).onChange( function() {
 						glowSharpness = controller.Glow_Sharpness;
 						glowMaterial.uniforms.c = { type: "f", value: glowSharpness };
@@ -1142,6 +1133,7 @@
 				    planet.position.set(Math.cos(planet.orbit) * planet.orbitRadiusX, 0, Math.sin(planet.orbit) * planet.orbitRadiusY);
 				}
 
+				// Updating the cameras position to follow a planet - smaller planets
 				function cameraUpdateA(camera, planet)
 				{
 					//camera.lookAt(planet.position);
@@ -1155,7 +1147,7 @@
 				    camera.position.set(Math.cos(planet.orbit) * (planet.orbitRadiusX+2), 0.2, Math.sin(planet.orbit) * (planet.orbitRadiusY+2));
 				}
 
-				// Updating the planets orbits around the sun
+				// Updating the cameras position to follow a planet - bigger planets
 				function cameraUpdateB(camera, planet)
 				{
 					//camera.lookAt(planet.position);
