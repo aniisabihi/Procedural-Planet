@@ -23,7 +23,6 @@
 
 		<!------------- ADDING NECCESARY SCRIPTS ------------->
 		<script src="js/three.min.js"></script>
-		<script src="js/OrbitControls.js"></script> 
 		<script src="js/dat.gui.min.js"></script>
 
 		<!--------- VERTEX SHADER - FOR EDITABLE SUN --------->
@@ -493,6 +492,7 @@
 			uniform float opacity;
 
 			void main() {
+
 				vec3 glow = glowColor * intensity;
 				vec3 colormix1 = mix(glow, glow, (1. - 2. * noise2));
 		      	vec3 colormix2 = mix(glow, glow, (1. - 2. * noise));
@@ -506,39 +506,34 @@
 
 			// Importing scripts to work not only locally but on github.io 
 			import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.112.0/build/three.module.js";
-		    import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.112.0/examples/jsm/controls/OrbitControls.js";
+		   	import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.112.0/examples/jsm/controls/OrbitControls.js";
 		    import {color, controllers, dom, gui, GUI} from "./js/dat.gui.module.js";
 
 			var container, renderer, scene,
 				camera, mesh, fov = 45, 
-				cameraPosX = -100,
+				cameraPosX = 0,
 				cameraPosY = 100,
 				cameraPosZ = 100,
 				width = window.innerWidth, 
 				height = window.innerHeight, 
-				ratio =  width/height,
+				ratio =  width / height,
 				start = Date.now();
 
 			window.addEventListener( 'load', init );
 
 			function init() {
 
-			// <!--------------------------------- SETTING UP SCENE ---------------------------------------------->
-				
+			// <!----------------------------------- SETTING UP SCENE -------------------------------------------->
 				container = document.getElementById( 'container' );
-
 				scene = new THREE.Scene();
 				renderer = new THREE.WebGLRenderer( {antialias:true});
 				renderer.setPixelRatio( window.devicePixelRatio );
 				renderer.setSize( width, height);
 				renderer.autoClear = false;
-				container.appendChild( renderer.domElement );
 
 				// Setting up camera
-				camera = new THREE.PerspectiveCamera( fov, ratio, 1, 10000 );
-				camera.position.x = cameraPosX;
-				camera.position.y = cameraPosY;
-				camera.position.z = cameraPosZ;
+				camera = new THREE.PerspectiveCamera( fov, ratio, 1, 1000 );
+				camera.position.set( cameraPosX, cameraPosY, cameraPosZ );
 				camera.target = new THREE.Vector3( 0, 0, 0 );
 				scene.add( camera );
 				var controls = new OrbitControls( camera, renderer.domElement ); // Give user control of camera
@@ -551,12 +546,11 @@
 					RIGHT: 39, // right arrow
 					BOTTOM: 40 // down arrow
 				}
-				//controls.autoRotate = true;
+
+				container.appendChild( renderer.domElement );
 			// <!------------------------------------------------------------------------------------------------->
 
-
-			// <!--------------------------------- MAIN GUI EDITABLE PLANET -------------------------------------->
-
+			// <!----------------------------------- MAIN GUI EDITABLE PLANET ------------------------------------>
 				// Sunlight - 360 light
 				var lightColor = 0xffffff,
 					lightIntensity = 1.0,
@@ -577,12 +571,10 @@
 				var noiseSpeed = .000030,
 					noiseSize = -0.10,
 					noiseDisplacement = -0.30;
-				
-				// Size of the sun
-				var sunSize = 25;
 
 				// Adding the sun to the scene
-				var sunGeometry = new THREE.IcosahedronGeometry( sunSize, 6 ), //new THREE.SphereGeometry( 8, 32, 32);
+				var sunSize = 20,
+					sunGeometry = new THREE.IcosahedronGeometry( sunSize, 6 ),
 					sunMaterial = new THREE.ShaderMaterial({
 									uniforms: {
 										highlight: {value: new THREE.Color(highlight)},
@@ -602,7 +594,7 @@
 				scene.add( sun );
 
 				// Glow parameters
-				var glowSize = sunSize + 3,
+				var glowSize = sunSize + 5,
 					glowColor = 0xe65c00,
 					glowSharpness = 0.2,
 					glowStrength = 1.9,
@@ -615,7 +607,7 @@
 										"c":   { type: "f", value: glowSharpness },
 										"p":   { type: "f", value: glowStrength },
 										opacity: { value: glowOpacity},
-										glowColor: { type: "c", value: new THREE.Color(glowColor) },
+										glowColor: { value: new THREE.Color(glowColor) },
 										viewVector: { type: "v3", value: camera.position },
 										displacementSize: {value: noiseDisplacement},
 										noise_size: {value: noiseSize},
@@ -631,192 +623,195 @@
 				scene.add(glow);
 			// <!------------------------------------------------------------------------------------------------->
 
-
-			// <!--------------------------------- ADDING PLANETS TO SOLAR SYSTEM -------------------------------->
-
+			// <!----------------------------------- ADDING PLANETS TO SOLAR SYSTEM ------------------------------>
 				// Function that generates planets with images as textures
-					function generatePlanet(radius, text, posX, posY, posZ, rotSpeed, rot, orbitSpeed)
-					{
-						var geometry = new THREE.SphereGeometry( radius, 32, 32 ),
-							texture = new THREE.TextureLoader().load( text ); // Load texture
-						
-						//Wrap texture
-						texture.wrapS = texture.wrapT = THREE.MirroredRepeatWrapping;
-						texture.repeat.set( 1, 1 );
-						
-						//Mesh texture
-						var material = new THREE.MeshPhongMaterial({
-								map : texture,
-								side : THREE.DoubleSide
-							}),
-							planet = new THREE.Mesh( geometry, material );
-						
-						// Orbit radius and rotations
-						planet.orbitRadius = posX;
-						planet.rotSpeed = rotSpeed; 
-						planet.rot = rot;
-						planet.orbitSpeed = orbitSpeed; //(0.02 * 0.0048) * 0.25;
-						planet.orbit = Math.PI * 2;
-						planet.position.set(planet.orbitRadius, posY, posZ);
+				function generatePlanet(radius, text, radX, radY, radZ, rotSpeed, orbitSpeed)
+				{
+					var geometry = new THREE.SphereGeometry( radius, 32, 32 ),
+						texture = new THREE.TextureLoader().load( text );
+					
+					//Wrap texture
+					texture.wrapS = texture.wrapT = THREE.MirroredRepeatWrapping;
+					texture.repeat.set( 1, 1 );
+					
+					var material = new THREE.MeshPhongMaterial({
+							map : texture,
+							side : THREE.DoubleSide
+						}),
+						planet = new THREE.Mesh( geometry, material );
+					
+					// Orbit radius and rotations
+					planet.orbitRadiusX = radX;
+					planet.orbitRadiusY = radY;
+					planet.orbitRadiusZ = radZ;
+					planet.rotSpeed = rotSpeed; 
+					planet.rot = 2;
+					planet.orbitSpeed = orbitSpeed;
+					planet.orbit = Math.PI * 2;
+					planet.position.set(radX, radY, radZ);
 
-						scene.add(planet);
-
-						return planet;
-					}
+					scene.add(planet);
+					return planet;
+				}
 
 				// Function that generates planets rings with images as textures
-					function generatePlanetRing(planet, inR, outR, thetaSeg, phiSeg,thetaStart, thetaLength, text, posX, posY, posZ)
-					{
-						var ringgeometry = new THREE.RingGeometry(inR, outR, thetaSeg, phiSeg, thetaStart, thetaLength),
-							texture = new THREE.TextureLoader().load( text );
+				function generatePlanetRing(planet, inR, outR, thetaSeg, phiSeg,thetaStart, thetaLength, text, posX, posY, posZ)
+				{
+					var ringgeometry = new THREE.RingGeometry(inR, outR, thetaSeg, phiSeg, thetaStart, thetaLength),
+						texture = new THREE.TextureLoader().load( text );
 
-						const uniforms = THREE.UniformsUtils.merge([
-						    THREE.UniformsLib.ambient,
-						    THREE.UniformsLib.lights,
-						    THREE.UniformsLib.shadowmap,
-						    {
-						      ringTexture: { value: null },
-						      innerRadius: { value: 0 },
-						      outerRadius: { value: 0 },
-						      lightPosition: { value: null }
-						    }
-						  ]);
-						  uniforms.ringTexture.value = texture;
-						  uniforms.innerRadius.value = inR;
-						  uniforms.outerRadius.value = outR;
-						  uniforms.lightPosition.value = new THREE.Vector3(-5, 5, 1);
+					const uniforms = THREE.UniformsUtils.merge([
+					    THREE.UniformsLib.ambient,
+					    THREE.UniformsLib.lights,
+					    THREE.UniformsLib.shadowmap,
+					    {
+					      ringTexture: { value: null },
+					      innerRadius: { value: 0 },
+					      outerRadius: { value: 0 },
+					      lightPosition: { value: null }
+					    }
+					  ]);
+					uniforms.ringTexture.value = texture;
+					uniforms.innerRadius.value = inR;
+					uniforms.outerRadius.value = outR;
+					uniforms.lightPosition.value = new THREE.Vector3(-5, 5, 1);
 
-						  const ringmaterial = new THREE.ShaderMaterial({
-							    uniforms,
-							    vertexShader: `
-									varying vec3 vPos;                                                     
-									varying vec3 vWorldPosition;                                           
-									varying vec3 vNormal;                                                 
+					const ringmaterial = new THREE.ShaderMaterial({
+					    uniforms,
+					    vertexShader: `
+							varying vec3 vPos;                                                     
+							varying vec3 vWorldPosition;                                           
+							varying vec3 vNormal;                                                 
 
-									${THREE.ShaderChunk["shadowmap_pars_vertex"]}                         
+							${THREE.ShaderChunk["shadowmap_pars_vertex"]}                         
 
-									void main() {                                                         
-									  vPos = position;                                                     
-									  //vec4 worldPosition = (modelViewMatrix * vec4(position, 1.));         
-									  vec4 worldPosition = modelMatrix * vec4(position, 1.0);
+							void main() {                                                         
+							  vPos = position;                                                     
+							  //vec4 worldPosition = (modelViewMatrix * vec4(position, 1.));         
+							  vec4 worldPosition = modelMatrix * vec4(position, 1.0);
 
-									  gl_Position = projectionMatrix * viewMatrix * vec4(worldPosition.xyz, 1.);       
+							  gl_Position = projectionMatrix * viewMatrix * vec4(worldPosition.xyz, 1.);       
 
-									  vNormal = normalMatrix * normal;                                     
-									  vWorldPosition = worldPosition.xyz;                                 
+							  vNormal = normalMatrix * normal;                                     
+							  vWorldPosition = worldPosition.xyz;                                 
 
-									  ${THREE.ShaderChunk["shadowmap_vertex"]}
-									}   
-									    `,
-							    fragmentShader: `
-									uniform sampler2D ringTexture;
-									uniform float innerRadius;
-									uniform float outerRadius;
-									uniform vec3 lightPosition;
-									varying vec3 vPos;
+							  ${THREE.ShaderChunk["shadowmap_vertex"]}
+							}`,
+					    fragmentShader: `
+							uniform sampler2D ringTexture;
+							uniform float innerRadius;
+							uniform float outerRadius;
+							uniform vec3 lightPosition;
+							varying vec3 vPos;
 
-									${THREE.ShaderChunk["common"]}
-									${THREE.ShaderChunk["packing"]}
-									${THREE.ShaderChunk["bsdfs"]}
-									${THREE.ShaderChunk["lights_pars_begin"]}
-									${THREE.ShaderChunk["shadowmap_pars_fragment"]}
-									${THREE.ShaderChunk["shadowmask_pars_fragment"]}
+							${THREE.ShaderChunk["common"]}
+							${THREE.ShaderChunk["packing"]}
+							${THREE.ShaderChunk["bsdfs"]}
+							${THREE.ShaderChunk["lights_pars_begin"]}
+							${THREE.ShaderChunk["shadowmap_pars_fragment"]}
+							${THREE.ShaderChunk["shadowmask_pars_fragment"]}
 
-									vec4 color() {
-									  vec2 uv = vec2(0);
-									  uv.x = (length(vPos) - innerRadius) / (outerRadius - innerRadius);
-									  if (uv.x < 0.0 || uv.x > 1.0) {
-									    discard;
-									  }                                                                           
-									  vec4 pixel = texture2D(ringTexture, uv);
-									  return pixel;
-									}
+							vec4 color() {
+							  vec2 uv = vec2(0);
+							  uv.x = (length(vPos) - innerRadius) / (outerRadius - innerRadius);
+							  if (uv.x < 0.0 || uv.x > 1.0) {
+							    discard;
+							  }                                                                           
+							  vec4 pixel = texture2D(ringTexture, uv);
+							  return pixel;
+							}
 
-									void main() {
-									  gl_FragColor = color() * vec4(vec3(getShadowMask()), 1.0);
-									}
-									    `,
-							    transparent: true,
-							    lights: true,
-							    side: THREE.DoubleSide,
-						  });
-							
-						var	ring = new THREE.Mesh( ringgeometry, ringmaterial );
-						ring.castShadow = true;
-		  				ring.receiveShadow = false;
-						ring.rotation.x = THREE.Math.degToRad(90);
+							void main() {
+							  gl_FragColor = color() * vec4(vec3(getShadowMask()), 1.0);
+							}`,
+					    transparent: true,
+					    lights: true,
+					    side: THREE.DoubleSide,
+					});
+						
+					var	ring = new THREE.Mesh( ringgeometry, ringmaterial );
+					ring.castShadow = true;
+	  				ring.receiveShadow = false;
+					ring.rotation.x = THREE.Math.degToRad(90);
 
-						planet.add(ring);
-
-						return ring; 
-					}
+					planet.add(ring);
+					return ring; 
+				}
 
 				// Function that generates planets orbit path around the sun
-					function generateOrbitLine(orbitRad)
-					{
-						var orbit = new THREE.LineLoop(
-							new THREE.CircleGeometry( orbitRad, 100 ),
-							new THREE.MeshBasicMaterial({
-							  color: 0xffffff,
-							  transparent: true,
-							  opacity: 0.8,
-							  side: THREE.BackSide
-							})
-						);
-						orbit.geometry.vertices.shift(); // Remove center vertex
-						orbit.rotation.x = THREE.Math.degToRad(90);
+				function generateOrbitLine(orbitRadX, orbitRadY)
+				{
+					var curve = new THREE.EllipseCurve(
+									0,  0,            		// ax, aY
+									orbitRadX, orbitRadY,	// xRadius, yRadius
+									0,  2 * Math.PI,  		// aStartAngle, aEndAngle
+									false,            		// aClockwise
+									0                		// aRotation
+								),
+						points = curve.getPoints( 150 ),
+						geometry = new THREE.BufferGeometry().setFromPoints( points ),
+						material = new THREE.MeshBasicMaterial({
+									  color: 0xffffff,
+									  transparent: true,
+									  opacity: 0.2,
+									  side: THREE.DoubleSide
+									}),
+						ellipse = new THREE.Line( geometry, material );
+					
+					ellipse.rotation.x = THREE.Math.degToRad(90);
 
-						scene.add(orbit);
-						return orbit; 
-					}
+					scene.add(ellipse);
+					return ellipse; 
+				}
 
-				// Positions, Rotations, Rotation Speed, Orbit Speed 
+				// Positions, Rotation Speed, Orbit Speed 
 				// Sources: http://www.qrg.northwestern.edu/projects/vss/docs/space-environment/3-orbital-lengths-distances.html
+				//			https://www.universetoday.com/15462/how-far-are-the-planets-from-the-sun/
+				//			https://www.space.com/18145-how-far-is-the-moon.html
 				// 			https://nssdc.gsfc.nasa.gov/planetary/factsheet/
 				//			https://spaceplace.nasa.gov/days/en/
 				// 			https://www.space.com/24871-does-the-moon-rotate.html
-					var earthPosX = 93.0, earthPosY = 0, earthPosZ = 0,						// 93,000,000 miles from the sun //47.4
-							earRS = 0.01,					// We set 0.01 as 1 Earth day
-							earR = 2.0,					
-							earOS = 0.005,				// We set 0.005 as 1 Earth year
-						mercuryPosX = 36.8, mercuryPosY = 0, mercuryPosZ = 0,				// 36,800,000 miles from the sun //40.6
-							merRS = earRS * (24/1408),		// 1,408 Earth hours
-							merR = 2.0, 
-							merOS = earOS * (12/3),		// 3 Earth months
-						venusPosX = 67.2, venusPosY = 0, venusPosZ = 0,						// 67,200,000 miles from the sun //43.8
-							venRS =  earRS * (24/5832), 	// 	5,832 Earth hours
-							venR = 2.0,  
-							venOS = earOS * (12/7), 	// 7 Earth months
-						moonPosX = earthPosX + (0.238855), moonPosY = 0, moonPosZ = 0, 		// 238 855 miles from the earth //47.4, 2, -2
-							monRS = 0.005*0.01, 			// Orbits Earth once every 27.322 days
-							monR = 2.0,  
-							monOS = earRS * 27,				// 27 Earth days
-						marsPosX = 141.6, marsPosY = 0, marsPosZ = 0, 						// 141,600,000 miles from the sun //50.6
-							marRS =  earRS * (24/25), 		// 25 Earth hours
-							marR = 2.0,  
-							marOS = earOS * (12/23),	// 23 Earth months
-						jupiterPosX = 483.6, jupiterPosY = 0, jupiterPosZ = 0,				// 483,600,000 miles from the sun //54.4
-							jupRS =  earRS * (24/10), 		// 10 Earth hours
-							jupR = 2.0,  
-							jupOS = earOS * (12/142),	// 142 Earth months	
-						saturnPosX = 886.5, saturnPosY = 0, saturnPosZ = 0, 				// 886,500,000 miles from the sun //60.9
-							satRS =  earRS * (24/11), 		// 11 Earth hours
-							satR = 2.0,  
-							satOS = earOS / 29.5,		// 29.5 Earth years
-						uranusPosX = 1783.7, uranusPosY = 0, uranusPosZ = 0, 				// 1,783,700,000 miles from the sun //68.4
-							uraRS =  earRS * (24/17), 		// 17 Earth hours
-							uraR = 2.0,  
-							uraOS = earOS / 84.0,		// 84 Earth years
-						neptunePosX = 3670.1, neptunePosY = 0, neptunePosZ = 0, 			// 3,670,100,000 miles from the sun //74.6
-							nepRS =  earRS * (24/16), 		// 16 Earth hours
-							nepR = 2.0,  
-							nepOS = earOS * (12/1979),	// 1979 Earth months
+				var earthRadX = 91, earthRadY = 94, earthRadZ = 0,						// 91-94 million miles from the sun
+						earRS = 0.001,													// We set 0.001 as 1 Earth day
+						earOS = 0.0025,													// We set 0.005 as 1 Earth year
 
-					// Size of the planets
-					// Sources: http://coolcosmos.ipac.caltech.edu/ask/167-How-small-is-the-Moon-compared-to-Earth-
-					//			http://coolcosmos.ipac.caltech.edu/ask/5-How-large-is-the-Sun-compared-to-Earth-
-					//			https://www.universetoday.com/36649/planets-in-order-of-size/
-					earSize = sunSize / 109,			// (6,371 km / 3,959 miles) 	- Earth is nearly 109 times smaller than the sun
+					mercuryRadX = 43, mercuryRadY = 29, mercuryRadZ = 0,				// 29-43 million miles from the sun
+						merRS = earRS * (24/1408),										// 1,408 Earth hours
+						merOS = earOS * (12/3),											// 3 Earth months
+
+					venusRadX = 68, venusRadY = 66, venusRadZ = 0,						// 66-68 million miles from the sun
+						venRS = earRS * (24/5832), 									// 5,832 Earth hours
+						venOS = earOS * (12/7), 										// 7 Earth months
+
+					moonRadX = 0.252088, moonRadY = 0.225623, moonRadZ = 0, 			// 225,623-252,088  miles from earth
+						monRS = earRS / 27.322, 										// Orbits Earth once every 27.322 days
+						monOS = earRS * 27,												// 27 Earth days
+
+					marsRadX = 155, marsRadY = 127, marsRadZ = 0, 						// 127-155 million miles from the sun
+						marRS = earRS * (24/25), 										// 25 Earth hours
+						marOS = earOS * (12/23),										// 23 Earth months
+
+					jupiterRadX = 508, jupiterRadY = 460, jupiterRadZ = 0,				// 460-508 million miles from the sun
+						jupRS = earRS * (24/10), 										// 10 Earth hours
+						jupOS = earOS * (12/142),										// 142 Earth months	
+
+					saturnRadX = 938, saturnRadY = 839, saturnRadZ = 0, 				// 839-938 million miles from the sun
+						satRS = earRS * (24/11), 										// 11 Earth hours
+						satOS = earOS / 29.5,											// 29.5 Earth years
+
+					uranusRadX = 1860, uranusRadY = 1710, uranusRadZ = 0, 				// 1710-1860 million miles from the sun
+						uraRS = earRS * (24/17), 										// 17 Earth hours
+						uraOS = earOS / 84.0,											// 84 Earth years
+
+					neptuneRadX = 2830, neptuneRadY = 2770, neptuneRadZ = 0, 			// 2770-2830 million miles from the sun
+						nepRS = earRS * (24/16), 										// 16 Earth hours
+						nepOS = earOS * (12/1979);										// 1979 Earth months
+
+				// Size of the planets
+				// Sources: http://coolcosmos.ipac.caltech.edu/ask/167-How-small-is-the-Moon-compared-to-Earth-
+				//			http://coolcosmos.ipac.caltech.edu/ask/5-How-large-is-the-Sun-compared-to-Earth-
+				//			https://www.universetoday.com/36649/planets-in-order-of-size/
+				var earSize = sunSize / 109,			// (6,371 km / 3,959 miles) 	- Earth is 109 times smaller than the sun
 					merSize = earSize * 0.38, 			// (2,440 km / 1,516 miles)		– 38% the size of Earth
 					venSize = earSize * 0.95, 			// (6,052 km / 3,761 miles) 	– 95% the size of Earth
 					monSize = earSize * 0.25,			// (3,476 km / 2,159 miles) 	- 25% the size of Earth
@@ -824,33 +819,21 @@
 					jupSize = earSize * 11.2, 			// (69,911 km / 43,441 miles) 	– 1120% the size of Earth
 					satSize = earSize * 9.45, 			// (58,232 km / 36,184 miles) 	– 945% the size of Earth
 					uraSize = earSize * 4.0, 			// (25,362 km / 15,759 miles) 	– 400% the size of Earth
-					nepSize = earSize * 3.88, 			// (24,622 km / 15,299 miles) 	– 388% the size of Earth
-	
+					nepSize = earSize * 3.88; 			// (24,622 km / 15,299 miles) 	– 388% the size of Earth
 
-					// Adding planets of the solar system (with image textures) to scene
-					mercury = generatePlanet(0.8, "img/textures/mercury.jpg" , mercuryPosX, mercuryPosY, mercuryPosZ, merRS, merR, merOS),
-					venus = generatePlanet(1.2, "img/textures/venus.jpg", venusPosX, venusPosY, venusPosZ, venRS, venR, venOS),
-					//moon = generatePlanet(0.6, "img/textures/moon.jpg", moonPosX, moonPosY, moonPosZ, monRS, monR, monOS),
-					mars = generatePlanet(0.8, "img/textures/mars.jpg", marsPosX, marsPosY, marsPosZ, marRS, marR, marOS),
-					jupiter = generatePlanet(2.3, "img/textures/jupiter.jpg", jupiterPosX, jupiterPosY, jupiterPosZ, jupRS, jupR, jupOS),
-					saturn = generatePlanet(1.9, "img/textures/saturn.jpg", saturnPosX, saturnPosY, saturnPosZ, satRS, satR, satOS),
-						saturnRing = generatePlanetRing(saturn, 2.0, 3.6, 30, 30, 0, 6.3, "img/textures/saturn_ring.png", saturnPosX, saturnPosY, saturnPosZ),
-					uranus = generatePlanet(1.8, "img/textures/uranus.jpg", uranusPosX, uranusPosY, uranusPosZ, uraRS, uraR, uraOS),
-						uranusRing = generatePlanetRing(uranus, 2.2, 3.2, 30, 30, 0, 6.3, "img/textures/uranus_ring.jpg", uranusPosX, uranusPosY, uranusPosZ),
-					neptune = generatePlanet(1.8, "img/textures/neptune.jpg", neptunePosX, neptunePosY, neptunePosZ, nepRS, nepR, nepOS);
-
-					// Earth + Clouds
-				var geometryEarth = new THREE.SphereGeometry(1.4, 32, 32),
-					geometryClouds = new THREE.SphereGeometry(1.42, 32, 32),
-					geometryMoon = new THREE.SphereGeometry(0.9, 32, 32),
-					materialEarth = new THREE.MeshStandardMaterial({
+				// Adding the Earth + Clouds + Moon
+				var geometryEarth = new THREE.SphereGeometry(earSize, 32, 32),
+					geometryClouds = new THREE.SphereGeometry(earSize+0.005, 32, 32),
+					geometryMoon = new THREE.SphereGeometry(monSize, 32, 32),
+					materialEarth = new THREE.MeshPhongMaterial({
 						map 		: new THREE.TextureLoader().load('img/textures/earth.jpg'),
 						bumpMap 	: new THREE.TextureLoader().load('img/textures/earthbump.jpg'),
 						bumpScale 	: 0.05,
-						specularMap : new THREE.TextureLoader().load('img/textures/earthspec.jpg'),
-						specular 	: new THREE.Color('grey'),
+						side 		: THREE.DoubleSide,
+						//specularMap : new THREE.TextureLoader().load('img/textures/earthspec.jpg'),
+						//specular 	: new THREE.Color('grey'),
 					}),
-					materialClouds  = new THREE.MeshPhongMaterial({
+					materialClouds  = new THREE.MeshStandardMaterial({
 						map     	: new THREE.TextureLoader().load('img/textures/earthcloud.jpg'),
 						side        : THREE.DoubleSide,
 						opacity     : 0.6,
@@ -864,98 +847,92 @@
 					earth = new THREE.Mesh(geometryEarth, materialEarth),
 					clouds = new THREE.Mesh(geometryClouds, materialClouds),
 					moon = new THREE.Mesh(geometryMoon, materialMoon);
-					moon.position.x = moonPosX;
-					moon.position.y = moonPosY;
-					moon.position.z = moonPosZ;
-					
-					// Orbit radius and rotations
-					//earth.orbitRadius = earthPosX;
-					//earth.rotSpeed = earRS;
-					//earth.rot = earR;
-					//earth.orbitSpeed = earOS;
-					//earth.orbit = Math.PI * 2;
-					//earth.position.set(earth.orbitRadius, earthPosY, earthPosZ);
+					earth.receiveShadow = true;
+					clouds.receiveShadow = true;
+					moon.castShadow = true;
 
-					//moon.orbitRadius = moonPosX;
-					//moon.rotSpeed = monRS;
-					//moon.rot = monR;
-					//moon.orbitSpeed = monOS;
-					//moon.orbit = Math.PI * 2;
-					//moon.position.set(moon.orbitRadius, moonPosY, moonPosZ);
+				// Orbit radius and rotations
+				earth.orbitRadiusX = earthRadX;
+				earth.orbitRadiusY = earthRadY;
+				earth.orbitRadiusZ = earthRadZ;
+				earth.rotSpeed = earRS;
+				earth.rot = 2;
+				earth.orbitSpeed = earOS;
+				earth.orbit = Math.PI * 2;
+				earth.position.set(earthRadX, earthRadY, earthRadZ);
 
-					//scene.add(earth);
-					//earth.add(clouds);
-					//earth.add(moon);
+				moon.orbitRadiusX = moonRadX;
+				moon.orbitRadiusY = moonRadY;
+				moon.orbitRadiusZ = moonRadZ;
+				moon.rotSpeed = monRS;
+				moon.rot = 2;
+				moon.orbitSpeed = monOS;
+				moon.orbit = Math.PI * 2;
+				moon.position.set(moonRadX, moonRadY, moonRadZ);
 
-					var earthGroup = new THREE.Group();
-						earthGroup.add( earth );
-						earthGroup.add( clouds );
-						earthGroup.add( moon );
+				scene.add( earth );
+				earth.add( clouds );
+				earth.add( moon );
 
-					// Orbit radius and rotations
-					earthGroup.orbitRadius = earthPosX;
-					earthGroup.rotSpeed = earRS;
-					earthGroup.rot = earR;
-					earthGroup.orbitSpeed = earOS;
-					earthGroup.orbit = Math.PI * 2;
-					earthGroup.position.set(earth.orbitRadius, earthPosY, earthPosZ);
-
-					scene.add( earthGroup );
+				// Adding planets (with image textures) to scene
+				var mercury = generatePlanet(merSize, "img/textures/mercury.jpg" , mercuryRadX, mercuryRadY, mercuryRadZ, merRS, merOS),
+					venus = generatePlanet(venSize, "img/textures/venus.jpg", venusRadX, venusRadY, venusRadZ, venRS, venOS),
+					mars = generatePlanet(marSize, "img/textures/mars.jpg", marsRadX, marsRadY, marsRadZ, marRS, marOS),
+					jupiter = generatePlanet(jupSize, "img/textures/jupiter.jpg", jupiterRadX, jupiterRadY, jupiterRadZ, jupRS, jupOS),
+					saturn = generatePlanet(satSize, "img/textures/saturn.jpg", saturnRadX, saturnRadY, saturnRadZ, satRS, satOS),
+					saturnRing = generatePlanetRing(saturn, 2.0, 3.6, 30, 30, 0, 6.3, "img/textures/saturn_ring.png", saturnRadX, saturnRadY, saturnRadZ),
+					uranus = generatePlanet(uraSize, "img/textures/uranus.jpg", uranusRadX, uranusRadY, uranusRadZ, uraRS, uraOS),
+					uranusRing = generatePlanetRing(uranus, 1.0, 1.8, 30, 30, 0, 6.3, "img/textures/uranus_ring.jpg", uranusRadX, uranusRadY, uranusRadZ),
+					neptune = generatePlanet(nepSize, "img/textures/neptune.jpg", neptuneRadX, neptuneRadY, neptuneRadZ, nepRS, nepOS);
 
 				// Adding planets orbits around the sun
-				var mercuryOrbit = generateOrbitLine(mercuryPosX), // mercuryPosY, mercuryPosZ),
-					venusOrbit = generateOrbitLine(venusPosX), // venusPosY, venusPosZ),
-					earthOrbit = generateOrbitLine(earthPosX), // earthPosY, earthPosZ),
-					//moonOrbit = generateOrbitLine(moonPosX), //moonPosY, moonPosX),
-					marsOrbit = generateOrbitLine(marsPosX), // marsPosY, marsPosZ),
-					jupiterOrbit = generateOrbitLine(jupiterPosX), // jupiterPosY, jupiterPosZ),
-					saturnOrbit = generateOrbitLine(saturnPosX), //saturnPosY, saturnPosZ),
-					uranusOrbit = generateOrbitLine(uranusPosX), // uranusPosY, uranusPosZ),
-					neptuneOrbit = generateOrbitLine(neptunePosX); //, neptunePosY, neptunePosZ);
-
-				// CREATING THE STARRY BACKGROUND
-					// Create particles
-					var particleCount = 2000,
-					    particles = new THREE.Geometry(),
-					    ptexture = new THREE.TextureLoader().load("img/textures/star.png"),
-					    pMaterial = new THREE.PointsMaterial({
-					      color: 0xFFFFFF,
-					      map: ptexture,
-					      transparent: true, 
-					      blending: THREE.AdditiveBlending,
-					      depthTest: true, 
-					      size: 2
-					});
-					// Create the individual particles
-					for (var p = 0; p < particleCount; p++) {
-					  // Create a particle with random x position (-120, 120)
-					  var pX = Math.random() * 240 - 120,
-					      pY = Math.random() * 240 - 120,
-					      pZ = Math.random() * 240 - 120,
-					      particle = new THREE.Vector3(pX, pY, pZ);
-
-					  particles.vertices.push(particle);
-					}
-					// Create the particle system
-					var particleSystem = new THREE.Points(particles, pMaterial);
-					particleSystem.sortParticles = true;
-					//scene.add(particleSystem);
+				generateOrbitLine(mercuryRadX, mercuryRadY),
+				generateOrbitLine(venusRadX, venusRadY), 
+				generateOrbitLine(earthRadX, earthRadX),
+				generateOrbitLine(marsRadX, marsRadY),
+				generateOrbitLine(jupiterRadX, jupiterRadY),
+				generateOrbitLine(saturnRadX, saturnRadY),
+				generateOrbitLine(uranusRadX, uranusRadY),
+				generateOrbitLine(neptuneRadX, neptuneRadY);
 			// <!------------------------------------------------------------------------------------------------->
 
+			// <!----------------------------------- ADDING A STARRY BACKGROUND ---------------------------------->
+				// Create particles
+				var particleCount = 2000,
+				    particles = new THREE.Geometry(),
+				    ptexture = new THREE.TextureLoader().load("img/textures/star.png"),
+				    pMaterial = new THREE.PointsMaterial({
+				      color: 0xFFFFFF,
+				      map: ptexture,
+				      transparent: true, 
+				      blending: THREE.AdditiveBlending,
+				      depthTest: true, 
+				      size: 2
+				});
 
-			// <!--------------------------------- CREATING GUI -------------------------------------------------->
-				
+				// Create the individual particles
+				for (var p = 0; p < particleCount; p++) {
+				  // Create a particle with random x position (-120, 120)
+				  var pX = Math.random() * 240 - 120,
+				      pY = Math.random() * 240 - 120,
+				      pZ = Math.random() * 240 - 120,
+				      particle = new THREE.Vector3(pX, pY, pZ);
+
+				  particles.vertices.push(particle);
+				}
+
+				// Create the particle system
+				var particleSystem = new THREE.Points(particles, pMaterial);
+				particleSystem.sortParticles = true;
+				//scene.add(particleSystem);
+			// <!------------------------------------------------------------------------------------------------->
+
+			// <!----------------------------------- CREATING GUI ------------------------------------------------>
 				var controller = new function() {
 				  this.positionX = cameraPosX;
 				  this.positionY = cameraPosY;
 				  this.positionZ = cameraPosZ;
 				  // Camera goes to planets position
-					  this.Sun = function () {
-					  	camera.position.x = sun.position.x;
-					    camera.position.y = sun.position.y;
-					    camera.position.z = sun.position.z + 80;
-					    controls.update(); 
-					  };
 					  this.Mercury = function () {
 					  	camera.position.x = mercury.position.x;
 					    camera.position.y = mercury.position.y;
@@ -973,12 +950,6 @@
 					    camera.position.y = earth.position.y;
 					    camera.position.z = earth.position.z;
 					    controls.update(); 
-					  };
-					  this.Moon = function () {
-					  	camera.position.x = moon.position.x;
-					    camera.position.y = moon.position.y;
-					    camera.position.z = moon.position.z; 
-					    controls.update();
 					  };
 					  this.Mars = function () {
 					  	camera.position.x = mars.position.x;
@@ -1010,7 +981,6 @@
 					    camera.position.z = neptune.position.z; 
 					    controls.update();
 					  };
-				  //this.Orbit_Speed = 0;
 				  this.Highlight_Color = highlight;
 				  this.Blend_Color = blend;
 				  this.Inner_Glow = innerGlow;
@@ -1023,6 +993,7 @@
 				  this.Noise_Displacement = noiseDisplacement; 
 				  this.Reset = function (){
 				  	// Camera
+				  	camera.position.set(cameraPosX,cameraPosY,cameraPosZ);
 				  	controls.reset();
 				    controls.update();
 
@@ -1035,7 +1006,7 @@
 					sunMaterial.uniforms.innerGlow = {value: new THREE.Color(innerGlow)};
 
 					// Sun Glow
-					glowSize = sunSize + 3;
+					glowSize = sunSize + 5;
 					glow.scale.x = glowSize * 0.044;
 					glow.scale.y = glowSize * 0.044;
 					glow.scale.z = glowSize * 0.044;
@@ -1073,21 +1044,14 @@
 					   camera.position.z = controller.positionZ;
 					   controls.update();
 					}).name('Z');
-					cameraPos.add( controller, 'Sun');
 					cameraPos.add( controller, 'Mercury');
 					cameraPos.add( controller, 'Venus');
 					cameraPos.add( controller, 'Earth');
-					cameraPos.add( controller, 'Moon');
 					cameraPos.add( controller, 'Mars');
 					cameraPos.add( controller, 'Jupiter');
 					cameraPos.add( controller, 'Saturn');
 					cameraPos.add( controller, 'Uranus');
 					cameraPos.add( controller, 'Neptune');
-
-				// Change orbits speed
-				//gui.add( controller, 'Orbit_Speed', 0, 1).onChange( function() {
-					//orbitSpeed = (controller.Orbit_Speed);
-				//}).name('Orbit Speed');
 
 				// Color folder
 				var colorFolder = gui.addFolder('Colors of the sun');
@@ -1113,10 +1077,10 @@
 						glow.scale.y = scale;
 						glow.scale.z = scale;
 					} ).name('Size');
-					glowFolder.addColor(controller, 'Glow_Color', glowColor ).onChange( function() {
-						glowColor = controller.Glow_color;
-						glowMaterial.uniforms.glowColor = { type: "c", value: new THREE.Color(glowColor) };
-					}).name('Color');
+					//glowFolder.addColor(controller, 'Glow_Color', glowColor ).onChange( function() {
+						//glowColor = controller.Glow_Colo;
+						//glowMaterial.uniforms.glowColor = {value: new THREE.Color(glowColor)};
+					//}).name('Color');
 					glowFolder.add(controller, 'Glow_Sharpness', 0.0, 1.0 ).onChange( function() {
 						glowSharpness = controller.Glow_Sharpness;
 						glowMaterial.uniforms.c = { type: "f", value: glowSharpness };
@@ -1146,60 +1110,93 @@
 				gui.add( controller, 'Reset').name('Reset settings');
 			// <!------------------------------------------------------------------------------------------------->
 
-
-			// <!--------------------------------- RENDERING SETTINGS -------------------------------------------->
-				
+			// <!----------------------------------- RENDERING SETTINGS ------------------------------------------>
 				function onWindowResize() {
 					renderer.setSize( width, height );
 					camera.aspect = ratio;
 					camera.updateProjectionMatrix();
 				}
+				
+				// Updating the planets orbits around the sun
+				function planetUpdate(planet)
+				{
+					// Planets rotations
+					planet.rot += planet.rotSpeed;
+				    planet.rotation.set(0, planet.rot, 0);
+
+				    // Planets orbit 
+				    planet.orbit += planet.orbitSpeed;
+				    planet.position.set(Math.cos(planet.orbit) * planet.orbitRadiusX, 0, Math.sin(planet.orbit) * planet.orbitRadiusY);
+				}
+
+				function cameraUpdateA(camera, planet)
+				{
+					//camera.lookAt(planet.position);
+
+					// Planets rotations
+					planet.rot += planet.rotSpeed;
+				    camera.rotation.set(0, planet.rot, 0);
+
+				    // Planets orbit 
+				    planet.orbit += planet.orbitSpeed;
+				    camera.position.set(Math.cos(planet.orbit) * (planet.orbitRadiusX+2), 0.2, Math.sin(planet.orbit) * (planet.orbitRadiusY+2));
+				}
+
+				// Updating the planets orbits around the sun
+				function cameraUpdateB(camera, planet)
+				{
+					//camera.lookAt(planet.position);
+
+					// Planets rotations
+					planet.rot += planet.rotSpeed;
+				    camera.rotation.set(0, planet.rot, 0);
+
+				    // Planets orbit 
+				    planet.orbit += planet.orbitSpeed;
+				    camera.position.set(Math.cos(planet.orbit) * (planet.orbitRadiusX+10), 1, Math.sin(planet.orbit) * (planet.orbitRadiusY+10));
+				}
+
+				var viewLight = new THREE.AmbientLight( 0xFFFFFF ); // white
+				//scene.add( viewlight );
 
 				function render() {
-
-					// Updating the planets orbits around the sun
-					function planetUpdate(planet)
-					{
-						// Planets rotations
-						planet.rot += planet.rotSpeed;
-					    planet.rotation.set(0, planet.rot, 0);
-
-					    // Planets orbit 
-					    planet.orbit += planet.orbitSpeed;
-					    planet.position.set(Math.cos(planet.orbit) * planet.orbitRadius, 0, Math.sin(planet.orbit) * planet.orbitRadius);
-					}
-
-					function earthUpdate(group, planet)
-					{
-						// Planets rotations
-						group.rot += group.rotSpeed;
-					    group.rotation.set(0, group.rot, 0);
-
-					    // Planets orbit 
-					    group.orbit += group.orbitSpeed;
-					    group.position.set(Math.cos(group.orbit) * group.orbitRadius, 0, Math.sin(group.orbit) * group.orbitRadius);
-					}
-
+					
 					planetUpdate(mercury);
 					planetUpdate(venus);
+					planetUpdate(earth);
+					planetUpdate(moon);
 					planetUpdate(mars);
 					planetUpdate(jupiter);
 					planetUpdate(saturn);
 					planetUpdate(uranus);
 					planetUpdate(neptune);
 
-					earthUpdate(earthGroup, earth);
-
 					// Rotations
 					particleSystem.rotation.y -= 0.0001;
 					sun.rotation.y -= 0.0001;
-					clouds.rotation.y  -= 0.0005;
-					moon.rotation.y  -= 0.001;
+					clouds.rotation.y  += 0.0001;
 
 					// Adding noise movement
 					sunMaterial.uniforms[ 'time' ].value = noiseSpeed * ( Date.now() - start );
 					glowMaterial.uniforms[ 'time' ].value = noiseSpeed * ( Date.now() - start )
 
+					//Update the camera position
+					//camera.position.x += 0.01;
+					//camera.position.y -= 0.01;
+					//camera.position.z -= 0.05;
+
+					//Flyby reset
+					//if (camera.position.z < -100) {
+					//camera.position.set(0,35,70);
+					//}
+
+					//Point the camera towards the earth
+					//if( camera.position.x = earth.position.x)
+					//{
+						//camera.lookAt(mercury.position);
+						//cameraUpdateA(camera, mercury);
+					//}
+					
 					controls.update();
 					requestAnimationFrame( render );
 					renderer.render( scene, camera );
