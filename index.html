@@ -496,7 +496,7 @@
 
 		<!------------------ MAIN SCRIPT --------------------->
 		<script type="module" id="main">
-			
+
 			// Importing scripts to work not only locally but on github.io 
 			import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.112.0/build/three.module.js";
 		   	import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.112.0/examples/jsm/controls/OrbitControls.js";
@@ -588,16 +588,16 @@
 				// Glow parameters
 				var glowSize = sunSize + 5,
 					glowColor = 0xe65c00,
-					glowSharpness = 0.2,
-					glowStrength = 1.9,
+					glowStrength = 0.2,
+					glowSharpness = 1.9,
 					glowOpacity = 1.0;
 
 				// Adding Glow around the sun 
 				var glowGeometry = new THREE.IcosahedronGeometry( glowSize, 4 ),
 					glowMaterial = new THREE.ShaderMaterial({
 									uniforms: {
-										"c":   { type: "f", value: glowSharpness },
-										"p":   { type: "f", value: glowStrength },
+										"c":   { type: "f", value: glowStrength },
+										"p":   { type: "f", value: glowSharpness },
 										opacity: { value: glowOpacity},
 										glowColor: { value: new THREE.Color(glowColor) },
 										viewVector: { type: "v3", value: camera.position },
@@ -1011,8 +1011,8 @@
 						glowColor = 0xe65c00;
 						glowMaterial.uniforms.glowColor = { type: "c", value: new THREE.Color(glowColor) };
 						controller.Glow_Color = glowColor;
-						glowSharpness = 0.2;
-						glowMaterial.uniforms.c = { type: "f", value: glowSharpness };
+						glowSharpness = 1.9;
+						glowMaterial.uniforms.p = { type: "f", value: glowSharpness };
 						controller.Glow_Sharpness = glowSharpness;
 						glowOpacity = 1.0;
 						glowMaterial.uniforms.opacity = { value: glowOpacity };
@@ -1082,12 +1082,12 @@
 						glow.scale.z = scale;
 					} ).listen().name('Size');
 					glowFolder.addColor(controller, 'Glow_Color', glowColor ).onChange( function() {
-						glowColor = controller.Glow_Colo;
+						glowColor = controller.Glow_Color;
 						glowMaterial.uniforms.glowColor = {value: new THREE.Color(glowColor)};
 					}).listen().name('Color');
-					glowFolder.add(controller, 'Glow_Sharpness', 0.0, 1.0 ).onChange( function() {
+					glowFolder.add(controller, 'Glow_Sharpness', 0.0, 6.0 ).onChange( function() {
 						glowSharpness = controller.Glow_Sharpness;
-						glowMaterial.uniforms.c = { type: "f", value: glowSharpness };
+						glowMaterial.uniforms.p = { type: "f", value: glowSharpness };
 					}).listen().name('Sharpness');
 					glowFolder.add( controller, 'Glow_Opacity', 0.0, 1.0 ).onChange( function() {
 				  		glowOpacity = controller.Glow_Opacity;
