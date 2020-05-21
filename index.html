@@ -962,7 +962,7 @@
 
 			// <!----------------------------------- ADDING A STARRY BACKGROUND ---------------------------------->
 				// Create particles
-				var particleCount = 2000,
+				var particleCount = 6000,
 				    particles = new THREE.Geometry(),
 				    ptexture = new THREE.TextureLoader().load("img/textures/star.png"),
 				    pMaterial = new THREE.PointsMaterial({
@@ -977,9 +977,9 @@
 				// Create the individual particles
 				for (var p = 0; p < particleCount; p++) {
 				  // Create a particle with random x position
-				  var pX = Math.random() * 3840 - 1320,
-				      pY = Math.random() * 3840 - 1320,
-				      pZ = Math.random() * 3840 - 1320,
+				  var pX = Math.random() * 4840 - 1320,
+				      pY = Math.random() * 4840 - 1320,
+				      pZ = Math.random() * 4840 - 1320,
 				      particle = new THREE.Vector3(pX, pY, pZ);
 				  particles.vertices.push(particle);
 				}
