@@ -1171,11 +1171,11 @@
 					noiseFolder.add( controller, 'Noise_Speed', 0.0, 0.001).onChange( function() {
 						noiseSpeed = controller.Noise_Speed;
 					}).listen().name('Speed');
-					noiseFolder.add( controller, 'Noise_Size', -1.0, -0.0).onChange( function() {
-						noiseSize = controller.Noise_Size;
-						sunMaterial.uniforms.noise_size = {value: noiseSize};
-						glowMaterial.uniforms.noise_size = {value: noiseSize};
-					}).listen().name('Size');
+					//noiseFolder.add( controller, 'Noise_Size', -1.0, -0.0).onChange( function() {
+						//noiseSize = controller.Noise_Size;
+						//sunMaterial.uniforms.noise_size = {value: noiseSize};
+						//glowMaterial.uniforms.noise_size = {value: noiseSize};
+					//}).listen().name('Size');
 					noiseFolder.add( controller, 'Noise_Displacement', -2.0, -0.0).onChange( function() {
 						noiseDisplacement = controller.Noise_Displacement;
 						sunMaterial.uniforms.displacementSize = {value: noiseDisplacement};
