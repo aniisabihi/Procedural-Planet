@@ -11,8 +11,8 @@
 				background-color: black;
 				margin: 0px;
 				overflow: hidden;
-				box-sizing: border-box; 
-				margin: 0; 
+				box-sizing: border-box;
+				margin: 0;
 				padding: 0;
 				cursor: pointer;
 			}
@@ -42,15 +42,15 @@
 			a:hover {
 				color: grey;
 			}
-			.no-js #loader { 
-				display: none; 
-				background: black; 
+			.no-js #loader {
+				display: none;
+				background: black;
 			}
-			.js #loader { 
-				display: block; 
-				position: absolute; 
-				left: 100px; 
-				top: 0; 
+			.js #loader {
+				display: block;
+				position: absolute;
+				left: 100px;
+				top: 0;
 				background: black;
 			}
 			.se-pre-con {
@@ -65,15 +65,15 @@
 		</style>
 	</head>
 	<body>
-		<!---- Loading gif ---->		
-		<div class="se-pre-con">
-		</div>
+		<!---- Loading gif ---->
+		<!-- <div class="se-pre-con">
+		</div> -->
 
 		<!---- Container ------>
-		<div id="container">			
+		<div id="container">
 			<!-- Footer with OrbitControls instructions -->
 			<footer>
-				<p>Left Click / Touch to <span> Orbit </span> </p> 
+				<p>Left Click / Touch to <span> Orbit </span> </p>
 				<p>Right Click / 3 Finger Swipe to <span> Pan </span> </p>
 				<p>Middle Click / Scroll / Pinch to <span> Zoom </span> </p>
 				<div style="text-align: right">
@@ -99,7 +99,7 @@
 
 		<!--------- VERTEX SHADER - FOR EDITABLE SUN --------->
 		<script type="x-shader/x-vertex" id="vertexShader">
-			
+
 			// ---------------------------- NOISE --------------------------->
 				//
 				// GLSL textureless classic 3D noise "cnoise",
@@ -205,7 +205,7 @@
 				  vec3 fade_xyz = fade(Pf0);
 				  vec4 n_z = mix(vec4(n000, n100, n010, n110), vec4(n001, n101, n011, n111), fade_xyz.z);
 				  vec2 n_yz = mix(n_z.xy, n_z.zw, fade_xyz.y);
-				  float n_xyz = mix(n_yz.x, n_yz.y, fade_xyz.x); 
+				  float n_xyz = mix(n_yz.x, n_yz.y, fade_xyz.x);
 				  return 2.2 * n_xyz;
 				}
 
@@ -275,13 +275,13 @@
 				  vec3 fade_xyz = fade(Pf0);
 				  vec4 n_z = mix(vec4(n000, n100, n010, n110), vec4(n001, n101, n011, n111), fade_xyz.z);
 				  vec2 n_yz = mix(n_z.xy, n_z.zw, fade_xyz.y);
-				  float n_xyz = mix(n_yz.x, n_yz.y, fade_xyz.x); 
+				  float n_xyz = mix(n_yz.x, n_yz.y, fade_xyz.x);
 				  return 2.2 * n_xyz;
 				}
 			// -------------------------------------------------------------->
 
 			varying float noise;
-			varying float noise2; 
+			varying float noise2;
 			uniform float time;
 
 			// Gui parameters
@@ -304,7 +304,7 @@
 			  float b = 5.0 * pnoise( 0.05 * position + vec3( 2.0 * time ), vec3( 100.0 ) );
 			  float displacement = - 5. * noise + b;
 
-			  vec3 newPosition = position + normal * ( displacement * displacementSize);
+			  vec3 newPosition = position + normal * ( displacement * displacementSize );
 			  gl_Position = projectionMatrix * modelViewMatrix * vec4( newPosition, 1.0 );
 			}
 		</script>
@@ -312,22 +312,22 @@
 		<!--------- FRAGMENT SHADER - FOR EDITABLE SUN ------->
 		<script type="x-shader/x-fragment" id="fragmentShader">
 
-	      varying float noise;
-	      varying float noise2;
+			varying float noise;
+			varying float noise2;
 
-	      // Gui parameters
-	      uniform vec3 highlight;
-	      uniform vec3 highlightBlend;
-	      uniform vec3 blend; 
-	      uniform vec3 innerGlow; 
+			// Gui parameters
+			uniform vec3 highlight;
+			uniform vec3 highlightBlend;
+			uniform vec3 blend;
+			uniform vec3 innerGlow;
 
-	      void main() 
-	      {
-	      	vec3 colormix1 = mix(highlight, highlightBlend, (1. - 2. * noise2));
-	      	vec3 colormix2 = mix(blend, innerGlow, (1. - 2. * noise));
-	      	vec3 colorNoise = mix(colormix1, colormix2, (1. -2. * noise)); 
-	      	gl_FragColor = vec4( colorNoise, 1.0);
-	      }
+			void main()
+			{
+				vec3 colormix1 = mix(highlight, highlightBlend, (1. - 2. * noise2));
+				vec3 colormix2 = mix(blend, innerGlow, (1. - 2. * noise));
+				vec3 finalColor = mix(colormix1, colormix2, (1. -2. * noise));
+				gl_FragColor = vec4( finalColor, 1.0);
+			}
 		</script>
 
 		<!--------- VERTEX SHADER - FOR SUN'S GLOW ----------->
@@ -438,7 +438,7 @@
 				  vec3 fade_xyz = fade(Pf0);
 				  vec4 n_z = mix(vec4(n000, n100, n010, n110), vec4(n001, n101, n011, n111), fade_xyz.z);
 				  vec2 n_yz = mix(n_z.xy, n_z.zw, fade_xyz.y);
-				  float n_xyz = mix(n_yz.x, n_yz.y, fade_xyz.x); 
+				  float n_xyz = mix(n_yz.x, n_yz.y, fade_xyz.x);
 				  return 2.2 * n_xyz;
 				}
 
@@ -508,7 +508,7 @@
 				  vec3 fade_xyz = fade(Pf0);
 				  vec4 n_z = mix(vec4(n000, n100, n010, n110), vec4(n001, n101, n011, n111), fade_xyz.z);
 				  vec2 n_yz = mix(n_z.xy, n_z.zw, fade_xyz.y);
-				  float n_xyz = mix(n_yz.x, n_yz.y, fade_xyz.x); 
+				  float n_xyz = mix(n_yz.x, n_yz.y, fade_xyz.x);
 				  return 2.2 * n_xyz;
 				}
 			// -------------------------------------------------------------->
@@ -561,7 +561,7 @@
 			void main()
 			{
 				vec3 glow = glowColor * intensity;
-		      	vec3 colorNoise = mix(glow, glow, (1. -2. * noise)); 
+		      	vec3 colorNoise = mix(glow, glow, (1. -2. * noise));
 				gl_FragColor = vec4( colorNoise, opacity);
 			}
 		</script>
@@ -569,18 +569,18 @@
 		<!--------- MAIN SCRIPT ------------------------------>
 		<script type="module" id="main">
 
-			// Importing scripts to work not only locally but on github.io 
+			// Importing scripts to work not only locally but on github.io
 			import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.112.0/build/three.module.js";
 		   	import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.112.0/examples/jsm/controls/OrbitControls.js";
 		    import {color, controllers, dom, gui, GUI} from "./js/dat.gui.module.js";
 
 			var container, renderer, scene,
-				camera, mesh, fov = 45, 
+				camera, mesh, fov = 45,
 				cameraPosX = 0,
 				cameraPosY = 100,
 				cameraPosZ = 100,
-				width = window.innerWidth, 
-				height = window.innerHeight, 
+				width = window.innerWidth,
+				height = window.innerHeight,
 				ratio =  width / height,
 				start = Date.now();
 
@@ -619,14 +619,14 @@
 				var lightColor = 0xffffff,
 					lightIntensity = 1.0,
 					lightDistance = 0.0, // Default - unlimited distance
-					lightDecay = 2.0, 
+					lightDecay = 2.0,
 					sunlight = new THREE.PointLight( lightColor, lightIntensity, lightDistance, lightDecay);
-				sunlight.power = lightIntensity * 4 * Math.PI; 
+				sunlight.power = lightIntensity * 4 * Math.PI;
 				sunlight.position.set( 0, 0, 0 );
 				scene.add( sunlight );
 
 				// Colors of the sun
-				var highlight = 0xcc9900, 
+				var highlight = 0xcc9900,
 					highlightBlend = 0xe65c00,
 					blend = 0xff0000,
 					innerGlow = 0x000000;
@@ -664,7 +664,7 @@
 					glowSharpness = 1.9,
 					glowOpacity = 1.0;
 
-				// Adding Glow around the sun 
+				// Adding Glow around the sun
 				var glowGeometry = new THREE.IcosahedronGeometry( glowSize, 4 ),
 					glowMaterial = new THREE.ShaderMaterial({
 									uniforms: {
@@ -693,22 +693,22 @@
 				{
 					var geometry = new THREE.SphereGeometry( radius, 32, 32 ),
 						texture = new THREE.TextureLoader().load( text );
-					
+
 					//Wrap texture
 					texture.wrapS = texture.wrapT = THREE.MirroredRepeatWrapping;
 					texture.repeat.set( 1, 1 );
-					
+
 					var material = new THREE.MeshPhongMaterial({
 							map : texture,
 							side : THREE.DoubleSide
 						}),
 						planet = new THREE.Mesh( geometry, material );
-					
+
 					// Orbit radius and rotations
 					planet.orbitRadiusX = radX;
 					planet.orbitRadiusY = radY;
 					planet.orbitRadiusZ = radZ;
-					planet.rotSpeed = rotSpeed; 
+					planet.rotSpeed = rotSpeed;
 					planet.rot = 2;
 					planet.orbitSpeed = orbitSpeed;
 					planet.orbit = Math.PI * 2;
@@ -743,21 +743,21 @@
 					const ringmaterial = new THREE.ShaderMaterial({
 					    uniforms,
 					    vertexShader: `
-							varying vec3 vPos;                                                     
-							varying vec3 vWorldPosition;                                           
-							varying vec3 vNormal;                                                 
+							varying vec3 vPos;
+							varying vec3 vWorldPosition;
+							varying vec3 vNormal;
 
-							${THREE.ShaderChunk["shadowmap_pars_vertex"]}                         
+							${THREE.ShaderChunk["shadowmap_pars_vertex"]}
 
-							void main() {                                                         
-							  vPos = position;                                                     
-							  //vec4 worldPosition = (modelViewMatrix * vec4(position, 1.));         
+							void main() {
+							  vPos = position;
+							  //vec4 worldPosition = (modelViewMatrix * vec4(position, 1.));
 							  vec4 worldPosition = modelMatrix * vec4(position, 1.0);
 
-							  gl_Position = projectionMatrix * viewMatrix * vec4(worldPosition.xyz, 1.);       
+							  gl_Position = projectionMatrix * viewMatrix * vec4(worldPosition.xyz, 1.);
 
-							  vNormal = normalMatrix * normal;                                     
-							  vWorldPosition = worldPosition.xyz;                                 
+							  vNormal = normalMatrix * normal;
+							  vWorldPosition = worldPosition.xyz;
 
 							  ${THREE.ShaderChunk["shadowmap_vertex"]}
 							}`,
@@ -780,7 +780,7 @@
 							  uv.x = (length(vPos) - innerRadius) / (outerRadius - innerRadius);
 							  if (uv.x < 0.0 || uv.x > 1.0) {
 							    discard;
-							  }                                                                           
+							  }
 							  vec4 pixel = texture2D(ringTexture, uv);
 							  return pixel;
 							}
@@ -792,14 +792,14 @@
 					    lights: true,
 					    side: THREE.DoubleSide,
 					});
-						
+
 					var	ring = new THREE.Mesh( ringgeometry, ringmaterial );
 					ring.castShadow = true;
 	  				ring.receiveShadow = false;
 					ring.rotation.x = THREE.Math.degToRad(90);
 
 					planet.add(ring);
-					return ring; 
+					return ring;
 				}
 
 				// Function that generates planets orbit path around the sun
@@ -821,14 +821,14 @@
 									  side: THREE.DoubleSide
 									}),
 						ellipse = new THREE.Line( geometry, material );
-					
+
 					ellipse.rotation.x = THREE.Math.degToRad(90);
 
 					scene.add(ellipse);
-					return ellipse; 
+					return ellipse;
 				}
 
-				// Positions, Rotation Speed, Orbit Speed 
+				// Positions, Rotation Speed, Orbit Speed
 				// Sources: http://www.qrg.northwestern.edu/projects/vss/docs/space-environment/3-orbital-lengths-distances.html
 				//			https://www.universetoday.com/15462/how-far-are-the-planets-from-the-sun/
 				//			https://www.space.com/18145-how-far-is-the-moon.html
@@ -857,7 +857,7 @@
 
 					jupiterRadX = 508, jupiterRadY = 460, jupiterRadZ = 0,				// 460-508 million miles from the sun
 						jupRS = earRS * (24/10), 										// 10 Earth hours
-						jupOS = earOS * (12/142),										// 142 Earth months	
+						jupOS = earOS * (12/142),										// 142 Earth months
 
 					saturnRadX = 938, saturnRadY = 839, saturnRadZ = 0, 				// 839-938 million miles from the sun
 						satRS = earRS * (24/11), 										// 11 Earth hours
@@ -951,7 +951,7 @@
 
 				// Adding planets orbits around the sun
 				generateOrbitLine(mercuryRadX, mercuryRadY),
-				generateOrbitLine(venusRadX, venusRadY), 
+				generateOrbitLine(venusRadX, venusRadY),
 				generateOrbitLine(earthRadX, earthRadX),
 				generateOrbitLine(marsRadX, marsRadY),
 				generateOrbitLine(jupiterRadX, jupiterRadY),
@@ -968,9 +968,9 @@
 				    pMaterial = new THREE.PointsMaterial({
 				      color: 0xFFFFFF,
 				      map: ptexture,
-				      transparent: true, 
+				      transparent: true,
 				      blending: THREE.AdditiveBlending,
-				      depthTest: true, 
+				      depthTest: true,
 				      size: 2
 				});
 
@@ -999,49 +999,49 @@
 					  this.Mercury = function () {
 					  	camera.position.x = mercury.position.x;
 					    camera.position.y = mercury.position.y;
-					    camera.position.z = mercury.position.z; 
+					    camera.position.z = mercury.position.z;
 					    controls.update();
 					  };
 					  this.Venus = function () {
 					  	camera.position.x = venus.position.x;
 					    camera.position.y = venus.position.y;
-					    camera.position.z = venus.position.z; 
+					    camera.position.z = venus.position.z;
 					    controls.update();
 					  };
 					  this.Earth = function () {
 					  	camera.position.x = earth.position.x;
 					    camera.position.y = earth.position.y;
 					    camera.position.z = earth.position.z;
-					    controls.update(); 
+					    controls.update();
 					  };
 					  this.Mars = function () {
 					  	camera.position.x = mars.position.x;
 					    camera.position.y = mars.position.y;
-					    camera.position.z = mars.position.z; 
+					    camera.position.z = mars.position.z;
 					    controls.update();
 					  };
 					  this.Jupiter = function () {
 					  	camera.position.x = jupiter.position.x;
 					    camera.position.y = jupiter.position.y;
-					    camera.position.z = jupiter.position.z; 
+					    camera.position.z = jupiter.position.z;
 					    controls.update();
 					  };
 					  this.Saturn = function () {
 					  	camera.position.x = saturn.position.x;
 					    camera.position.y = saturn.position.y;
-					    camera.position.z = saturn.position.z; 
+					    camera.position.z = saturn.position.z;
 					    controls.update();
 					  };
 					  this.Uranus = function () {
 					  	camera.position.x = uranus.position.x;
 					    camera.position.y = uranus.position.y;
-					    camera.position.z = uranus.position.z; 
+					    camera.position.z = uranus.position.z;
 					    controls.update();
 					  };
 					  this.Neptune = function () {
 					  	camera.position.x = neptune.position.x;
 					    camera.position.y = neptune.position.y;
-					    camera.position.z = neptune.position.z; 
+					    camera.position.z = neptune.position.z;
 					    controls.update();
 					  };
 				  this.Highlight_Color = highlight;
@@ -1051,9 +1051,9 @@
 				  this.Glow_Color = glowColor;
 				  this.Glow_Sharpness = glowSharpness;
 				  this.Glow_Opacity = glowOpacity;
-				  this.Noise_Speed = noiseSpeed; 
-				  this.Noise_Size = noiseSize; 
-				  this.Noise_Displacement = noiseDisplacement; 
+				  this.Noise_Speed = noiseSpeed;
+				  this.Noise_Size = noiseSize;
+				  this.Noise_Displacement = noiseDisplacement;
 				  this.Reset = function (){
 					  	// Camera
 					  	camera.position.set(cameraPosX,cameraPosY,cameraPosZ);
@@ -1090,7 +1090,7 @@
 						glowMaterial.uniforms.opacity = { value: glowOpacity };
 						controller.Glow_Opacity = glowOpacity;
 
-						// Noise 
+						// Noise
 						noiseSpeed = .000030;
 						controller.Noise_Speed = noiseSpeed;
 						noiseSize = -0.10;
@@ -1105,7 +1105,7 @@
 					};
 
 				var gui = new dat.GUI({name: 'Control the solar system'});
-				
+
 				// View all planets up close
 				var cameraPos = gui.addFolder('Camera position');
 					cameraPos.add(controller, 'positionX', -100, 100).onChange( function() {
@@ -1166,7 +1166,7 @@
 				  		glowMaterial.uniforms.opacity = { value: glowOpacity };
 					} ).listen().name('Opacity');
 
-				// Noise folder 
+				// Noise folder
 				var noiseFolder = gui.addFolder('Sun noise');
 					noiseFolder.add( controller, 'Noise_Speed', 0.0, 0.001).onChange( function() {
 						noiseSpeed = controller.Noise_Speed;
@@ -1192,7 +1192,7 @@
 					camera.aspect = ratio;
 					camera.updateProjectionMatrix();
 				}
-				
+
 				// Updating the planets orbits around the sun
 				function planetUpdate(planet)
 				{
@@ -1200,7 +1200,7 @@
 					planet.rot += planet.rotSpeed;
 				    planet.rotation.set(0, planet.rot, 0);
 
-				    // Planets orbit 
+				    // Planets orbit
 				    planet.orbit += planet.orbitSpeed;
 				    planet.position.set(Math.cos(planet.orbit) * planet.orbitRadiusX, 0, Math.sin(planet.orbit) * planet.orbitRadiusY);
 				}
@@ -1214,7 +1214,7 @@
 					planet.rot += planet.rotSpeed;
 				    camera.rotation.set(0, planet.rot, 0);
 
-				    // Planets orbit 
+				    // Planets orbit
 				    planet.orbit += planet.orbitSpeed;
 				    camera.position.set(Math.cos(planet.orbit) * (planet.orbitRadiusX+2), 0.2, Math.sin(planet.orbit) * (planet.orbitRadiusY+2));
 				}
@@ -1228,7 +1228,7 @@
 					planet.rot += planet.rotSpeed;
 				    camera.rotation.set(0, planet.rot, 0);
 
-				    // Planets orbit 
+				    // Planets orbit
 				    planet.orbit += planet.orbitSpeed;
 				    camera.position.set(Math.cos(planet.orbit) * (planet.orbitRadiusX+10), 1, Math.sin(planet.orbit) * (planet.orbitRadiusY+10));
 				}
@@ -1237,7 +1237,7 @@
 				//scene.add( viewlight );
 
 				function render() {
-					
+
 					planetUpdate(mercury);
 					planetUpdate(venus);
 					planetUpdate(earth);
@@ -1273,7 +1273,7 @@
 						//camera.lookAt(mercury.position);
 						//cameraUpdateA(camera, mercury);
 					//}
-					
+
 					controls.update();
 					requestAnimationFrame( render );
 					renderer.render( scene, camera );
