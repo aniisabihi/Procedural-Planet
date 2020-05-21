@@ -575,7 +575,7 @@
 		    import {color, controllers, dom, gui, GUI} from "./js/dat.gui.module.js";
 
 			var container, renderer, scene,
-				camera, mesh, fov = 45,
+				camera, mesh, fov = 75,
 				cameraPosX = 0,
 				cameraPosY = 100,
 				cameraPosZ = 100,
@@ -596,7 +596,7 @@
 				renderer.autoClear = false;
 
 				// Setting up camera
-				camera = new THREE.PerspectiveCamera( fov, ratio, 1, 6000 );
+				camera = new THREE.PerspectiveCamera( fov, ratio, 1, 10000 );
 				camera.position.set( cameraPosX, cameraPosY, cameraPosZ );
 				camera.target = new THREE.Vector3( 0, 0, 0 );
 				scene.add( camera );
