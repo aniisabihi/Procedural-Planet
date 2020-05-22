@@ -1107,7 +1107,7 @@
 				var gui = new dat.GUI({name: 'Control the solar system'});
 
 				// View all planets up close
-				var cameraPos = gui.addFolder('Camera position');
+				var cameraPos = gui.addFolder('Camera distance');
 				cameraPos.add( controller, 'Mercury').listen();
 				cameraPos.add( controller, 'Venus').listen();
 				cameraPos.add( controller, 'Earth').listen();
@@ -1222,7 +1222,7 @@
 				}
 
 				var viewLight = new THREE.AmbientLight( 0xFFFFFF );
-				//scene.add( viewlight );
+				scene.add( viewlight );
 
 				function render() {
 
@@ -1261,6 +1261,7 @@
 						//camera.lookAt(mercury.position);
 						//cameraUpdateA(camera, mercury);
 					//}
+					camera.lookAt(mercury.position);
 
 					controls.update();
 					requestAnimationFrame( render );
