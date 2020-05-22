@@ -1222,7 +1222,7 @@
 				}
 
 				var viewLight = new THREE.AmbientLight( 0xFFFFFF );
-				//scene.add( viewlight );
+				scene.add( viewlight );
 
 				function render() {
 
@@ -1261,6 +1261,7 @@
 						//camera.lookAt(mercury.position);
 						//cameraUpdateA(camera, mercury);
 					//}
+					camera.lookAt(mercury.position);
 
 					controls.update();
 					requestAnimationFrame( render );
