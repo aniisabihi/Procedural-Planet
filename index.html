@@ -540,8 +540,8 @@
 			  float displacement = - 5. * noise + b;
 
 			  vec3 vNormal = normalize( normalMatrix * normal );
-		      vec3 vNormel = normalize( normalMatrix * viewVector );
-		      intensity = pow( c - dot(vNormal, vNormel), p );
+		    vec3 vNormel = normalize( normalMatrix * viewVector );
+		    intensity = pow( c - dot(vNormal, vNormel), p );
 
 			  vec3 newPosition = position + normal * ( displacement * displacementSize);
 			  gl_Position = projectionMatrix * modelViewMatrix * vec4( newPosition, 1.0 );
@@ -561,7 +561,7 @@
 			void main()
 			{
 				vec3 glow = glowColor * intensity;
-		      	vec3 colorNoise = mix(glow, glow, (1. -2. * noise));
+		    vec3 colorNoise = mix(glow, glow, (1. -2. * noise));
 				gl_FragColor = vec4( colorNoise, opacity);
 			}
 		</script>
@@ -578,7 +578,7 @@
 				camera, mesh, fov = 75,
 				cameraPosX = 0,
 				cameraPosY = 100,
-				cameraPosZ = 100,
+				cameraPosZ = 140,
 				width = window.innerWidth,
 				height = window.innerHeight,
 				ratio =  width / height,
@@ -803,7 +803,7 @@
 				}
 
 				// Function that generates planets orbit path around the sun
-				function generateOrbitLine(orbitRadX, orbitRadY)
+				function generateOrbitLine(orbitRadX, orbitRadY, orbitColor)
 				{
 					var curve = new THREE.EllipseCurve(
 									0,  0,            		// ax, aY
@@ -815,9 +815,9 @@
 						points = curve.getPoints( 150 ),
 						geometry = new THREE.BufferGeometry().setFromPoints( points ),
 						material = new THREE.MeshBasicMaterial({
-									  color: 0xffffff,
+									  color: orbitColor,
 									  transparent: true,
-									  opacity: 0.2,
+									  opacity: 0.6,
 									  side: THREE.DoubleSide
 									}),
 						ellipse = new THREE.Line( geometry, material );
@@ -887,9 +887,9 @@
 
 				// Adding the Earth + Clouds + Moon
 				var geometryEarth = new THREE.SphereGeometry(earSize, 32, 32),
-					geometryClouds = new THREE.SphereGeometry(earSize+0.005, 32, 32),
-					geometryMoon = new THREE.SphereGeometry(monSize, 32, 32),
-					materialEarth = new THREE.MeshPhongMaterial({
+						geometryClouds = new THREE.SphereGeometry(earSize+0.005, 32, 32),
+						geometryMoon = new THREE.SphereGeometry(monSize, 32, 32),
+						materialEarth = new THREE.MeshPhongMaterial({
 						map 		: new THREE.TextureLoader().load('img/textures/earth.jpg'),
 						bumpMap 	: new THREE.TextureLoader().load('img/textures/earthbump.jpg'),
 						bumpScale 	: 0.05,
@@ -898,14 +898,14 @@
 						//specular 	: new THREE.Color('grey'),
 					}),
 					materialClouds  = new THREE.MeshStandardMaterial({
-						map     	: new THREE.TextureLoader().load('img/textures/earthcloud.jpg'),
+						map     		: new THREE.TextureLoader().load('img/textures/earthcloud.jpg'),
 						side        : THREE.DoubleSide,
 						opacity     : 0.6,
 						transparent : true,
 						depthWrite  : false
 					}),
 					materialMoon  = new THREE.MeshPhongMaterial({
-						map     	: new THREE.TextureLoader().load('img/textures/moon.jpg'),
+						map     		: new THREE.TextureLoader().load('img/textures/moon.jpg'),
 						side        : THREE.DoubleSide,
 					}),
 					earth = new THREE.Mesh(geometryEarth, materialEarth),
@@ -950,19 +950,19 @@
 					neptune = generatePlanet(nepSize, "img/textures/neptune.jpg", neptuneRadX, neptuneRadY, neptuneRadZ, nepRS, nepOS);
 
 				// Adding planets orbits around the sun
-				generateOrbitLine(mercuryRadX, mercuryRadY),
-				generateOrbitLine(venusRadX, venusRadY),
-				generateOrbitLine(earthRadX, earthRadX),
-				generateOrbitLine(marsRadX, marsRadY),
-				generateOrbitLine(jupiterRadX, jupiterRadY),
-				generateOrbitLine(saturnRadX, saturnRadY),
-				generateOrbitLine(uranusRadX, uranusRadY),
-				generateOrbitLine(neptuneRadX, neptuneRadY);
+				generateOrbitLine(mercuryRadX, mercuryRadY, 0x66ccff),
+				generateOrbitLine(venusRadX, venusRadY, 0x99ff66),
+				generateOrbitLine(earthRadX, earthRadX, 0xffff00),
+				generateOrbitLine(marsRadX, marsRadY, 0xffa500),
+				generateOrbitLine(jupiterRadX, jupiterRadY, 0xff3300),
+				generateOrbitLine(saturnRadX, saturnRadY, 0xff0066),
+				generateOrbitLine(uranusRadX, uranusRadY, 0xcc00cc),
+				generateOrbitLine(neptuneRadX, neptuneRadY, 0xFFFFFF);
 			// <!------------------------------------------------------------------------------------------------->
 
 			// <!----------------------------------- ADDING A STARRY BACKGROUND ---------------------------------->
 				// Create particles
-				var particleCount = 40000,
+				var particleCount = 4000000,
 				    particles = new THREE.Geometry(),
 				    ptexture = new THREE.TextureLoader().load("img/textures/star.png"),
 				    pMaterial = new THREE.PointsMaterial({
@@ -977,9 +977,9 @@
 				// Create the individual particles
 				for (var p = 0; p < particleCount; p++) {
 				  // Create a particle with random x position
-				  var pX = Math.random() * 4840 - 1320,
-				      pY = Math.random() * 4840 - 1320,
-				      pZ = Math.random() * 4840 - 1320,
+				  var pX = Math.random() * 8840 - 2320,
+				      pY = Math.random() * 8840 - 2320,
+				      pZ = Math.random() * 8840 - 2320,
 				      particle = new THREE.Vector3(pX, pY, pZ);
 				  particles.vertices.push(particle);
 				}
@@ -1055,18 +1055,18 @@
 				  this.Noise_Size = noiseSize;
 				  this.Noise_Displacement = noiseDisplacement;
 				  this.Reset = function (){
-					  	// Camera
-					  	camera.position.set(cameraPosX,cameraPosY,cameraPosZ);
-					  	controller.positionX = cameraPosX;
-					  	controller.positionY = cameraPosY;
-					  	controller.positionZ = cameraPosZ;
-					  	controls.reset();
-					    controls.update();
+				  	// Camera
+				  	camera.position.set(cameraPosX,cameraPosY,cameraPosZ);
+				  	controller.positionX = cameraPosX;
+				  	controller.positionY = cameraPosY;
+				  	controller.positionZ = cameraPosZ;
+				  	controls.reset();
+				    controls.update();
 
-					    // Sun
-					    highlight = 0xcc9900;
-					    sunMaterial.uniforms.highlight = {value: new THREE.Color(highlight)};
-					    controller.Highlight_Color = highlight;
+				    // Sun
+				    highlight = 0xcc9900;
+				    sunMaterial.uniforms.highlight = {value: new THREE.Color(highlight)};
+				    controller.Highlight_Color = highlight;
 						blend = 0xff0000;
 						sunMaterial.uniforms.blend = {value: new THREE.Color(blend)};
 						controller.Blend_Color = blend;
@@ -1188,9 +1188,9 @@
 					planet.rot += planet.rotSpeed;
 				    planet.rotation.set(0, planet.rot, 0);
 
-				    // Planets orbit
-				    planet.orbit += planet.orbitSpeed;
-				    planet.position.set(Math.cos(planet.orbit) * planet.orbitRadiusX, 0, Math.sin(planet.orbit) * planet.orbitRadiusY);
+			    // Planets orbit
+			    planet.orbit += planet.orbitSpeed;
+			    planet.position.set(Math.cos(planet.orbit) * planet.orbitRadiusX, 0, Math.sin(planet.orbit) * planet.orbitRadiusY);
 				}
 
 				// Updating the cameras position to follow a planet - smaller planets
@@ -1200,12 +1200,12 @@
 
 					// Planets rotations
 					planet.rot += planet.rotSpeed;
-				    camera.rotation.set(0, planet.rot, 0);
+				  camera.rotation.set(0, planet.rot, 0);
 
-				    // Planets orbit
-				    planet.orbit += planet.orbitSpeed;
-				    camera.position.set(Math.cos(planet.orbit) * (planet.orbitRadiusX+2), 0.2, Math.sin(planet.orbit) * (planet.orbitRadiusY+2));
-				}
+			    // Planets orbit
+			    planet.orbit += planet.orbitSpeed;
+			    camera.position.set(Math.cos(planet.orbit) * (planet.orbitRadiusX+2), 0.2, Math.sin(planet.orbit) * (planet.orbitRadiusY+2));
+			}
 
 				// Updating the cameras position to follow a planet - bigger planets
 				function cameraUpdateB(camera, planet)
@@ -1214,15 +1214,15 @@
 
 					// Planets rotations
 					planet.rot += planet.rotSpeed;
-				    camera.rotation.set(0, planet.rot, 0);
+				  camera.rotation.set(0, planet.rot, 0);
 
-				    // Planets orbit
-				    planet.orbit += planet.orbitSpeed;
-				    camera.position.set(Math.cos(planet.orbit) * (planet.orbitRadiusX+10), 1, Math.sin(planet.orbit) * (planet.orbitRadiusY+10));
+			    // Planets orbit
+			    planet.orbit += planet.orbitSpeed;
+			    camera.position.set(Math.cos(planet.orbit) * (planet.orbitRadiusX+10), 1, Math.sin(planet.orbit) * (planet.orbitRadiusY+10));
 				}
 
-				var viewLight = new THREE.AmbientLight( 0xFFFFFF );
-				scene.add( viewlight );
+				//var viewLight = new THREE.AmbientLight( 0xFFFFFF );
+				//scene.add( viewlight );
 
 				function render() {
 
@@ -1261,7 +1261,7 @@
 						//camera.lookAt(mercury.position);
 						//cameraUpdateA(camera, mercury);
 					//}
-					camera.lookAt(mercury.position);
+					//camera.lookAt(mercury.position);
 
 					controls.update();
 					requestAnimationFrame( render );
